@@ -4,13 +4,14 @@ import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegistrationForm {
     private String fullName;
 
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private String address;
 
@@ -28,11 +29,11 @@ public class RegistrationForm {
         this.fullName = fullName;
     }
 
-    public Date getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

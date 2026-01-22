@@ -1,5 +1,7 @@
 package com.TranTienAnh.CoreService.Configurations;
 
+import com.TranTienAnh.CoreService.Exceptions.CustomAccessDeniedHandler;
+import com.TranTienAnh.CoreService.Exceptions.CustomAuthenticationEntryPoint;
 import com.TranTienAnh.CoreService.Filters.JwtAuthenticationFilter;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Services.Implementations.UserDetailServiceImpl;
@@ -29,6 +31,12 @@ public class SecurityConfiguration {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticateFilter;
 
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
@@ -43,7 +51,11 @@ public class SecurityConfiguration {
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticateFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticateFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                );
 
         return httpSecurity.build();
     }

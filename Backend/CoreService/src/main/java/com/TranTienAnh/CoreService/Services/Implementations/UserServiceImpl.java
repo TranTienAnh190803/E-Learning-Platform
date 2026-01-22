@@ -69,11 +69,11 @@ public class UserServiceImpl implements UserService {
     public Response<JwtResponseDto> login(LoginForm loginForm) {
         Response<JwtResponseDto> response = new Response<>();
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword())
-            );
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword())
+        );
 
+        try {
             var user = userRepository.findByEmail(loginForm.getEmail()).orElseThrow(() -> new BadCredentialsException("Incorrect login information"));
             var token = jwtUtil.generateToken(user);
             JwtResponseDto jwtResponseDto = new JwtResponseDto(user.getRole().name(), token);
