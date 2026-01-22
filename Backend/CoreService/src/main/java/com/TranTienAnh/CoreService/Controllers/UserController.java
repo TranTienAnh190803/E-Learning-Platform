@@ -2,16 +2,19 @@ package com.TranTienAnh.CoreService.Controllers;
 
 import com.TranTienAnh.CoreService.DTOs.JwtResponseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
+import com.TranTienAnh.CoreService.DTOs.UserDto;
 import com.TranTienAnh.CoreService.Forms.LoginForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("user-api")
@@ -34,6 +37,20 @@ public class UserController {
     @PostMapping("login")
     public ResponseEntity<Response<JwtResponseDto>> login(@RequestBody LoginForm loginForm) {
         Response<JwtResponseDto> response = userService.login(loginForm);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("all-user")
+    public ResponseEntity<Response<List<UserDto>>> getAll() {
+        Response<List<UserDto>> response = userService.getAll();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("profile")
+    public ResponseEntity<Response<UserDto>> getProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Response<UserDto> response = userService.getProfile(email);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

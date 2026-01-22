@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfiguration {
     @Autowired
     private UserDetailServiceImpl userService;
@@ -43,10 +45,10 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/*/login", "/*/instructor-registration", "/*/student-registration").permitAll()
-                                .requestMatchers("/*/admin/**").hasAnyAuthority(Role.ADMIN.name())
-                                .requestMatchers("/*/instructor/**").hasAnyAuthority(Role.INSTRUCTOR.name())
-                                .requestMatchers("/*/student/**").hasAnyAuthority(Role.STUDENT.name())
-                                .requestMatchers("/*/instructor-student/**").hasAnyAuthority(Role.INSTRUCTOR.name(), Role.STUDENT.name())
+//                                .requestMatchers("/*/admin/**").hasAnyAuthority(Role.ADMIN.name())
+//                                .requestMatchers("/*/instructor/**").hasAnyAuthority(Role.INSTRUCTOR.name())
+//                                .requestMatchers("/*/student/**").hasAnyAuthority(Role.STUDENT.name())
+//                                .requestMatchers("/*/instructor-student/**").hasAnyAuthority(Role.INSTRUCTOR.name(), Role.STUDENT.name())
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
