@@ -44,7 +44,7 @@ public class SecurityConfiguration {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/*/login", "/*/instructor-registration", "/*/student-registration").permitAll()
+                        request.requestMatchers("/*/public/**").permitAll()
 //                                .requestMatchers("/*/admin/**").hasAnyAuthority(Role.ADMIN.name())
 //                                .requestMatchers("/*/instructor/**").hasAnyAuthority(Role.INSTRUCTOR.name())
 //                                .requestMatchers("/*/student/**").hasAnyAuthority(Role.STUDENT.name())

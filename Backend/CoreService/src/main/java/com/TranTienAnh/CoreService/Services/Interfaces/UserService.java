@@ -17,4 +17,6 @@ public interface UserService {
     Response<List<UserDto>> getAll();
 
     Response<UserDto> getProfile(String email);
+
+    Response<Void> sendOtpForgotPassword(String email);
 }

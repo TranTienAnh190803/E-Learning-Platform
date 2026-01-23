@@ -22,19 +22,19 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("instructor-registration")
+    @PostMapping("public/instructor-registration")
     public ResponseEntity<Response<Void>> instructorRegistration(@RequestBody RegistrationForm registrationForm) {
         Response<Void> response = userService.registration(registrationForm, Role.INSTRUCTOR);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("student-registration")
+    @PostMapping("public/student-registration")
     public ResponseEntity<Response<Void>> studentRegistration(@RequestBody RegistrationForm registrationForm) {
         Response<Void> response = userService.registration(registrationForm, Role.STUDENT);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("login")
+    @PostMapping("public/login")
     public ResponseEntity<Response<JwtResponseDto>> login(@RequestBody LoginForm loginForm) {
         Response<JwtResponseDto> response = userService.login(loginForm);
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -51,6 +51,12 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Response<UserDto> response = userService.getProfile(email);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("public/otp-forgot-password/{email}")
+    public ResponseEntity<Response<Void>> otpForgotPassword(@PathVariable("email") String email) {
+        Response<Void> response = userService.sendOtpForgotPassword(email);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }
