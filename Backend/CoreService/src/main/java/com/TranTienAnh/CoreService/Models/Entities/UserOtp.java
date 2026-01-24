@@ -4,6 +4,7 @@ import com.TranTienAnh.CoreService.Models.Enums.OtpPurpose;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class UserOtp {
@@ -15,20 +16,24 @@ public class UserOtp {
     private String otpCode;
 
     @Column(nullable = false)
+    private Boolean isVerified;
+
+    @Column(nullable = false)
     private LocalDateTime expiredTime;
 
     @Column(nullable = false)
     private OtpPurpose purpose;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     public UserOtp() {
     }
 
-    public UserOtp(String otpCode, LocalDateTime expiredTime, OtpPurpose purpose, User user) {
+    public UserOtp(String otpCode, Boolean isVerified, LocalDateTime expiredTime, OtpPurpose purpose, User user) {
         this.otpCode = otpCode;
+        this.isVerified = isVerified;
         this.expiredTime = expiredTime;
         this.purpose = purpose;
         this.user = user;
@@ -48,6 +53,14 @@ public class UserOtp {
 
     public void setOtpCode(String otpCode) {
         this.otpCode = otpCode;
+    }
+
+    public Boolean getVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(Boolean verified) {
+        isVerified = verified;
     }
 
     public LocalDateTime getExpiredTime() {

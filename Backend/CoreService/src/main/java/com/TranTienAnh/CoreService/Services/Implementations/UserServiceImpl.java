@@ -4,6 +4,8 @@ import com.TranTienAnh.CoreService.DTOs.JwtResponseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.DTOs.UserDto;
 import com.TranTienAnh.CoreService.Forms.LoginForm;
+import com.TranTienAnh.CoreService.Forms.PasswordChangingForm;
+import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Entities.User;
 import com.TranTienAnh.CoreService.Models.Entities.UserOtp;
@@ -129,7 +131,7 @@ public class UserServiceImpl implements UserService {
         try {
             var userList = userRepository.findByRoleIn(List.of(Role.STUDENT, Role.INSTRUCTOR))
                     .stream()
-                    .map(u -> new UserDto(u.getId(), u.getFullName(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail()))
+                    .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getActive()))
                     .collect(Collectors.toList());
             response.setStatusCode(200);
             response.setSuccess(true);
@@ -159,10 +161,12 @@ public class UserServiceImpl implements UserService {
                 UserDto userDto = new UserDto(
                         user.getId(),
                         user.getFullName(),
+                        user.getGender(),
                         user.getDateOfBirth(),
                         user.getAddress(),
                         user.getRole().name(),
-                        user.getEmail()
+                        user.getEmail(),
+                        user.getActive()
                 );
 
                 response.setSuccess(true);
@@ -193,6 +197,7 @@ public class UserServiceImpl implements UserService {
                     // Tạo OTP và lưu vào CSDL
                     var otp = new UserOtp(
                             userOtpService.GenerateOtp(),
+                            false,
                             LocalDateTime.now().plusMinutes(2),
                             OtpPurpose.FORGOT_PASSWORD,
                             user
@@ -226,6 +231,232 @@ public class UserServiceImpl implements UserService {
                 response.setSuccess(false);
                 response.setStatusCode(400);
                 response.setMessage("Your email address is not registered in the system.");
+            }
+        } catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> verifyForgottenPasswordOtp(String email, String otp) {
+        Response<Void> response = new Response<>();
+
+        try {
+            var user = userRepository.findByEmail(email).orElse(null);
+
+            if (user != null) {
+                var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.FORGOT_PASSWORD).orElse(null);
+                if (userOtp != null && userOtp.getOtpCode().equals(otp) && !userOtp.getVerified() && !LocalDateTime.now().isAfter(userOtp.getExpiredTime())) {
+                    userOtp.setVerified(true);
+                    userOtpRepository.save(userOtp);
+
+                    response.setSuccess(true);
+                    response.setStatusCode(200);
+                    response.setMessage("Verified OTP Successfully.");
+                }
+                else if (userOtp != null && !userOtp.getOtpCode().equals(otp)) {
+                    response.setSuccess(false);
+                    response.setStatusCode(400);
+                    response.setMessage("Wrong OTP.");
+                }
+                else if (userOtp != null && userOtp.getVerified()) {
+                    response.setSuccess(false);
+                    response.setStatusCode(400);
+                    response.setMessage("This OTP has been verified.");
+                }
+                else if (userOtp != null && LocalDateTime.now().isAfter(userOtp.getExpiredTime())) {
+                    response.setSuccess(false);
+                    response.setStatusCode(400);
+                    response.setMessage("This OTP has expired.");
+                } else {
+                    response.setSuccess(false);
+                    response.setStatusCode(400);
+                    response.setMessage("Wrong OTP.");
+                }
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("Can not find User.");
+            }
+        } catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> changeForgottenPassword(String email, String otp, PasswordChangingForm passwordChangingForm) {
+        Response<Void> response = new Response<>();
+
+        if (!passwordChangingForm.getNewPassword().equals(passwordChangingForm.getReEnteredPassword())) {
+            response.setSuccess(false);
+            response.setStatusCode(400);
+            response.setMessage("Your new password and your re-entered password must match.");
+            return response;
+        }
+
+        try {
+            var user = userRepository.findByEmail(email).orElse(null);
+
+            if (user != null) {
+                var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.FORGOT_PASSWORD).orElse(null);
+                if (userOtp != null && userOtp.getVerified()) {
+                    user.setPassword(passwordEncoder.encode(passwordChangingForm.getNewPassword()));
+                    userRepository.save(user);
+
+                    response.setSuccess(true);
+                    response.setStatusCode(200);
+                    response.setMessage("Change password successfully.");
+                }
+                else {
+                    response.setSuccess(false);
+                    response.setStatusCode(400);
+                    response.setMessage("Can not change password (OTP haven't verified).");
+                }
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("Can not find User.");
+            }
+        } catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
+    @Override
+    public Response<Void> changePassword(String email, String oldPassword, PasswordChangingForm passwordChangingForm) {
+        Response<Void> response = new Response<>();
+
+        if (!passwordChangingForm.getNewPassword().equals(passwordChangingForm.getReEnteredPassword())) {
+            response.setSuccess(false);
+            response.setStatusCode(400);
+            response.setMessage("Your new password and your re-entered password must match.");
+            return response;
+        }
+
+        try {
+            var user = userRepository.findByEmail(email).orElse(null);
+            if (user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(passwordChangingForm.getNewPassword()));
+                userRepository.save(user);
+
+                response.setSuccess(true);
+                response.setStatusCode(200);
+                response.setMessage("Change password successfully.");
+            }
+            else if (user == null) {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User not found.");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(400);
+                response.setMessage("Wrong old password.");
+            }
+        } catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
+    @Override
+    public Response<Void> changeProfile(String email, ProfileChangingForm profileChangingForm) {
+        Response<Void> response = new Response<>();
+
+        try {
+            var user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                user.setFullName(profileChangingForm.getFullName());
+                user.setDateOfBirth(profileChangingForm.getDateOfBirth());
+                user.setGender(profileChangingForm.getGender());
+                user.setAddress(profileChangingForm.getAddress());
+                userRepository.save(user);
+
+                response.setSuccess(true);
+                response.setStatusCode(200);
+                response.setMessage("Update profile successfully");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User not found.");
+            }
+        }
+        catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Override
+    public Response<Void> controlAccount(Long userId, Boolean isActive) {
+        Response<Void> response = new Response<>();
+
+        try {
+            var user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                user.setActive(isActive);
+                userRepository.save(user);
+
+                response.setSuccess(true);
+                response.setStatusCode(200);
+                response.setMessage(isActive ? "Enable account successfully" : "Disabled account successfully");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User not found.");
+            }
+        } catch (Exception e) {
+            response.setSuccess(false);
+            response.setStatusCode(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Override
+    public Response<Void> deleteAccount(Long userId) {
+        Response<Void> response = new Response<>();
+
+        try {
+            var user = userRepository.findById(userId).orElse(null);
+            if (user != null && user.getRole() != Role.ADMIN) {
+                userRepository.delete(user);
+
+                response.setSuccess(true);
+                response.setStatusCode(200);
+                response.setMessage("Deleted account successfully");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User not found.");
             }
         } catch (Exception e) {
             response.setSuccess(false);
