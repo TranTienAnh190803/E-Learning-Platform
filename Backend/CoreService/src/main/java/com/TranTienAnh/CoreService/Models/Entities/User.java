@@ -23,6 +23,9 @@ public class User implements UserDetails {
     private String fullName;
 
     @Column(nullable = false)
+    private Boolean gender;
+
+    @Column(nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(nullable = false)
@@ -37,16 +40,21 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private Boolean isActive;
+
     public User() {
     }
 
-    public User(String fullName, LocalDate dateOfBirth, String address, Role role, String email, String password) {
+    public User(String fullName, Boolean gender, LocalDate dateOfBirth, String address, Role role, String email, String password, Boolean isActive) {
         this.fullName = fullName;
+        this.gender = gender;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.role = role;
         this.email = email;
         this.password = password;
+        this.isActive = isActive;
     }
 
     public Long getId() {
@@ -63,6 +71,14 @@ public class User implements UserDetails {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public Boolean getGender() {
+        return gender;
+    }
+
+    public void setGender(Boolean gender) {
+        this.gender = gender;
     }
 
     public LocalDate getDateOfBirth() {
@@ -99,6 +115,14 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
     // User Detail Implementation

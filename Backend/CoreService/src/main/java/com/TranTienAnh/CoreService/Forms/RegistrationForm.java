@@ -11,6 +11,8 @@ import java.util.Date;
 public class RegistrationForm {
     private String fullName;
 
+    private Boolean gender;
+
     private LocalDate dateOfBirth;
 
     private String address;
@@ -27,6 +29,14 @@ public class RegistrationForm {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public Boolean getGender() {
+        return gender;
+    }
+
+    public void setGender(Boolean gender) {
+        this.gender = gender;
     }
 
     public LocalDate getDateOfBirth() {

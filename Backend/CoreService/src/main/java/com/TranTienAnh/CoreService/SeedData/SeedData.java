@@ -25,11 +25,13 @@ public class SeedData implements CommandLineRunner {
             // Tôi sẽ để thông tin Admin trong .env (Tạm thời sẽ để thông tin admin vào trong Code)
             User admin = new User(
                     "Admin",
+                    true,
                     LocalDate.now(),
                     "HaNoi",
                     Role.ADMIN,
                     "admin@system.com",
-                    passwordEncoder.encode("12345")
+                    passwordEncoder.encode("12345"),
+                    true
             );
 
             userRepository.save(admin);

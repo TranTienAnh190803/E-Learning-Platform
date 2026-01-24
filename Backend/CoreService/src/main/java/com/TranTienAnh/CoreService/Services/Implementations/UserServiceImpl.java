@@ -55,11 +55,13 @@ public class UserServiceImpl implements UserService {
             if (registrationForm.getPassword().equals(registrationForm.getReEnteredPassword())) {
                 User user = new User(
                         registrationForm.getFullName(),
+                        registrationForm.getGender(),
                         registrationForm.getDateOfBirth(),
                         registrationForm.getAddress(),
                         role,
                         registrationForm.getEmail(),
-                        passwordEncoder.encode(registrationForm.getPassword())
+                        passwordEncoder.encode(registrationForm.getPassword()),
+                        true
                 );
                 User newUser = userRepository.save(user);
 
@@ -92,17 +94,22 @@ public class UserServiceImpl implements UserService {
 
         try {
             var user = userRepository.findByEmail(loginForm.getEmail()).orElse(null);
-            if (user == null) {
-                response.setSuccess(false);
-                response.setStatusCode(404);
-                response.setMessage("User information not found");
-            }
-            else {
+            if (user != null && user.getActive()) {
                 var token = jwtUtil.generateToken(user);
                 JwtResponseDto jwtResponseDto = new JwtResponseDto(user.getRole().name(), token);
                 response.setSuccess(true);
                 response.setStatusCode(200);
                 response.setData(jwtResponseDto);
+            }
+            else if (user == null) {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User information not found");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(400);
+                response.setMessage("Your account has been disabled.");
             }
         }
         catch (Exception e) {
