@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Repositories;
 
 import com.TranTienAnh.CoreService.Models.Entities.User;
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRoleIn(List<Role> roles);
 
-    Optional<User> findByEmailAndIsActive(String email, Boolean isActive);
+    Optional<User> findByEmailAndStatus(String email, AccountStatus status);
 
-    Optional<User> findByIdAndIsActive(Long id, Boolean isActive);
+    Optional<User> findByIdAndStatus(Long id, AccountStatus status);
 }

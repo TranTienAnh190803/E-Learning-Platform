@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.SeedData;
 
 import com.TranTienAnh.CoreService.Models.Entities.User;
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class SeedData implements CommandLineRunner {
                     Role.ADMIN,
                     "admin@system.com",
                     passwordEncoder.encode("12345"),
-                    true
+                    AccountStatus.ACTIVE
             );
 
             userRepository.save(admin);

@@ -20,12 +20,14 @@ public class UserDto {
 
     private String email;
 
-    private Boolean isActive;
+    private String status;
+
+    private int statusNumber;
 
     // Constructor
 
 
-    public UserDto(Long id, String fullName, Boolean gender, LocalDate dateOfBirth, String address, String role, String email, Boolean isActive) {
+    public UserDto(Long id, String fullName, Boolean gender, LocalDate dateOfBirth, String address, String role, String email, String status, int statusNumber) {
         this.id = id;
         this.fullName = fullName;
         this.gender = gender;
@@ -33,7 +35,8 @@ public class UserDto {
         this.address = address;
         this.role = role;
         this.email = email;
-        this.isActive = isActive;
+        this.status = status;
+        this.statusNumber = statusNumber;
     }
 
     // Getter & Setter
@@ -93,11 +96,19 @@ public class UserDto {
         this.gender = gender;
     }
 
-    public Boolean getActive() {
-        return isActive;
+    public String getStatus() {
+        return status;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getStatusNumber() {
+        return statusNumber;
+    }
+
+    public void setStatusNumber(int statusNumber) {
+        this.statusNumber = statusNumber;
     }
 }

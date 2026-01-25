@@ -1,5 +1,6 @@
 package com.TranTienAnh.CoreService.Models.Entities;
 
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import jakarta.persistence.*;
 import org.jspecify.annotations.Nullable;
@@ -41,12 +42,12 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false)
-    private Boolean isActive;
+    private AccountStatus status;
 
     public User() {
     }
 
-    public User(String fullName, Boolean gender, LocalDate dateOfBirth, String address, Role role, String email, String password, Boolean isActive) {
+    public User(String fullName, Boolean gender, LocalDate dateOfBirth, String address, Role role, String email, String password, AccountStatus status) {
         this.fullName = fullName;
         this.gender = gender;
         this.dateOfBirth = dateOfBirth;
@@ -54,7 +55,7 @@ public class User implements UserDetails {
         this.role = role;
         this.email = email;
         this.password = password;
-        this.isActive = isActive;
+        this.status = status;
     }
 
     public Long getId() {
@@ -117,12 +118,12 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Boolean getActive() {
-        return isActive;
+    public AccountStatus getStatus() {
+        return status;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setStatus(AccountStatus status) {
+        this.status = status;
     }
 
     // User Detail Implementation

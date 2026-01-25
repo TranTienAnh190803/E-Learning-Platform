@@ -3,24 +3,29 @@ package com.TranTienAnh.CoreService.Services.Implementations;
 import com.TranTienAnh.CoreService.DTOs.JwtResponseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.DTOs.UserDto;
+import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
+import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.LoginForm;
 import com.TranTienAnh.CoreService.Forms.PasswordChangingForm;
 import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Entities.User;
 import com.TranTienAnh.CoreService.Models.Entities.UserOtp;
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.OtpPurpose;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.UserOtpRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserOtpService;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserService;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,37 +55,89 @@ public class UserServiceImpl implements UserService {
     private UserOtpService userOtpService;
 
     @Override
+    @Transactional
     public Response<Void> registration(RegistrationForm registrationForm, Role role) {
         Response<Void> response = new Response<>();
 
-        try {
-            if (registrationForm.getPassword().equals(registrationForm.getReEnteredPassword())) {
-                User user = new User(
-                        registrationForm.getFullName(),
-                        registrationForm.getGender(),
-                        registrationForm.getDateOfBirth(),
-                        registrationForm.getAddress(),
-                        role,
-                        registrationForm.getEmail(),
-                        passwordEncoder.encode(registrationForm.getPassword()),
-                        true
-                );
-                User newUser = userRepository.save(user);
+        if (!registrationForm.getPassword().equals(registrationForm.getReEnteredPassword())) {
+            throw new CustomBadRequestException("Password does not match");
+        }
 
-                response.setSuccess(true);
-                response.setStatusCode(201);
-                response.setMessage("Registered Successfully.");
+        var user = userRepository.findByEmail(registrationForm.getEmail()).orElse(null);
+        String emailOtp = "";
+
+        // Có 2 trường hợp đăng ký
+        // 1. Tài khoản chưa tồn tại trong CSDL (chưa từng đăng ký): Tạo tài khoản mới và OTP trong CSDL
+        // 2. Tài khoản đã tồn tại trong CSDL nhưng trạng tái PENDING (đăng ký nhưng chưa xác thực OTP):
+        //      2.1. OTP của tài khoản liên kết chưa tồn tại trong CSDL => tạo OTP để xác thực
+        //      2.2. OTP của tài khoản liên kết đã tồn tại trong CSDL => sửa mã OTP và TG hết hạn
+        if (user == null) {
+            User newUser = new User(
+                    registrationForm.getFullName(),
+                    registrationForm.getGender(),
+                    registrationForm.getDateOfBirth(),
+                    registrationForm.getAddress(),
+                    role,
+                    registrationForm.getEmail(),
+                    passwordEncoder.encode(registrationForm.getPassword()),
+                    AccountStatus.PENDING
+            );
+            userRepository.save(newUser);
+
+            UserOtp otp = new UserOtp(
+                    userOtpService.GenerateOtp(),
+                    false,
+                    LocalDateTime.now().plusMinutes(2),
+                    OtpPurpose.VERIFY_EMAIL,
+                    newUser
+            );
+            userOtpRepository.save(otp);
+
+            emailOtp = otp.getOtpCode();
+            response.setSuccess(true);
+            response.setStatusCode(201);
+            response.setMessage("Please check your mail for OTP.");
+        }
+        else if (user.getStatus() == AccountStatus.PENDING) {
+            var otp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.VERIFY_EMAIL).orElse(null);
+            if (otp == null) {
+                UserOtp newOtp = new UserOtp(
+                        userOtpService.GenerateOtp(),
+                        false,
+                        LocalDateTime.now().plusMinutes(2),
+                        OtpPurpose.VERIFY_EMAIL,
+                        user
+                );
+                userOtpRepository.save(newOtp);
+                emailOtp = newOtp.getOtpCode();
             }
             else {
-                response.setSuccess(false);
-                response.setStatusCode(400);
-                response.setMessage("Your registration password and your re-entered password must match.");
+                otp.setOtpCode(userOtpService.GenerateOtp());
+                otp.setExpiredTime(LocalDateTime.now().plusMinutes(2));
+                userOtpRepository.save(otp);
+                emailOtp = otp.getOtpCode();
             }
 
+            response.setSuccess(true);
+            response.setStatusCode(201);
+            response.setMessage("Please check your mail for OTP.");
+        }
+        else {
+            throw new CustomBadRequestException("The email has already been used.");
+        }
+
+        // Gửi Mail
+        try {
+            String template = mailService.loadHtmlTemplate("OtpVerifyEmailTemplate.html");
+            template = template.replace("{{OtpCode}}", emailOtp);
+            mailService.sendMail(
+                    "elearning@system.com",
+                    registrationForm.getEmail(),
+                    "Verify Email OTP",
+                    template
+            );
         } catch (Exception e) {
-            response.setSuccess(false);
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
         return response;
@@ -96,22 +153,22 @@ public class UserServiceImpl implements UserService {
 
         try {
             var user = userRepository.findByEmail(loginForm.getEmail()).orElse(null);
-            if (user != null && user.getActive()) {
+            if (user != null && user.getStatus() == AccountStatus.ACTIVE) {
                 var token = jwtUtil.generateToken(user);
                 JwtResponseDto jwtResponseDto = new JwtResponseDto(user.getRole().name(), token);
                 response.setSuccess(true);
                 response.setStatusCode(200);
                 response.setData(jwtResponseDto);
             }
-            else if (user == null) {
-                response.setSuccess(false);
-                response.setStatusCode(404);
-                response.setMessage("User information not found");
-            }
-            else {
+            else if (user != null && user.getStatus() == AccountStatus.DISABLE) {
                 response.setSuccess(false);
                 response.setStatusCode(400);
                 response.setMessage("Your account has been disabled.");
+            }
+            else {
+                response.setSuccess(false);
+                response.setStatusCode(404);
+                response.setMessage("User information not found");
             }
         }
         catch (Exception e) {
@@ -131,7 +188,7 @@ public class UserServiceImpl implements UserService {
         try {
             var userList = userRepository.findByRoleIn(List.of(Role.STUDENT, Role.INSTRUCTOR))
                     .stream()
-                    .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getActive()))
+                    .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
                     .collect(Collectors.toList());
             response.setStatusCode(200);
             response.setSuccess(true);
@@ -166,7 +223,8 @@ public class UserServiceImpl implements UserService {
                         user.getAddress(),
                         user.getRole().name(),
                         user.getEmail(),
-                        user.getActive()
+                        user.getStatus().name(),
+                        user.getStatus().getValue()
                 );
 
                 response.setSuccess(true);
@@ -214,7 +272,7 @@ public class UserServiceImpl implements UserService {
                 }
 
                 // Gưi mail
-                String template = mailService.loadHtmlTemplate("OtpTemplate.html");
+                String template = mailService.loadHtmlTemplate("OtpChangePasswordTemplate.html");
                 template = template.replace("{{OtpCode}}", otpCode);
                 mailService.sendMail(
                         "elearning@system.com",
@@ -412,18 +470,18 @@ public class UserServiceImpl implements UserService {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Override
-    public Response<Void> controlAccount(Long userId, Boolean isActive) {
+    public Response<Void> controlAccount(Long userId, AccountStatus status) {
         Response<Void> response = new Response<>();
 
         try {
             var user = userRepository.findById(userId).orElse(null);
             if (user != null) {
-                user.setActive(isActive);
+                user.setStatus(status);
                 userRepository.save(user);
 
                 response.setSuccess(true);
                 response.setStatusCode(200);
-                response.setMessage(isActive ? "Enable account successfully" : "Disabled account successfully");
+                response.setMessage(status == AccountStatus.ACTIVE ? "Enable account successfully" : "Disabled account successfully");
             }
             else {
                 response.setSuccess(false);
@@ -462,6 +520,36 @@ public class UserServiceImpl implements UserService {
             response.setSuccess(false);
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public Response<Void> verifyRegistrationEmail(String email, String otp) {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.VERIFY_EMAIL).orElseThrow(() -> new RuntimeException("Something wrong, please re-register."));
+        if (user.getStatus() == AccountStatus.PENDING && otp.equals(userOtp.getOtpCode()) && !LocalDateTime.now().isAfter(userOtp.getExpiredTime())) {
+            user.setStatus(AccountStatus.ACTIVE);
+            userRepository.save(user);
+
+            userOtpRepository.delete(userOtp);
+
+            response.setStatusCode(200);
+            response.setSuccess(true);
+            response.setMessage("Your account have been successfully registered.");
+        }
+        else if (!otp.equals(userOtp.getOtpCode())) {
+            throw new CustomBadRequestException("Wrong OTP.");
+        }
+        else if (LocalDateTime.now().isAfter(userOtp.getExpiredTime())) {
+            throw new CustomBadRequestException("Your OTP has expired.");
+        }
+        else {
+            throw new CustomBadRequestException("Cannot verify account that already exist in the system.");
         }
 
         return response;

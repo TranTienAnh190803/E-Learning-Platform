@@ -7,6 +7,7 @@ import com.TranTienAnh.CoreService.Forms.LoginForm;
 import com.TranTienAnh.CoreService.Forms.PasswordChangingForm;
 import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,12 @@ public class UserController {
     @PostMapping("public/student-registration")
     public ResponseEntity<Response<Void>> studentRegistration(@RequestBody RegistrationForm registrationForm) {
         Response<Void> response = userService.registration(registrationForm, Role.STUDENT);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("public/verify-registration-email/{email}/{otp}")
+    public ResponseEntity<Response<Void>> studentRegistration(@PathVariable("email") String email, @PathVariable("otp") String otp) {
+        Response<Void> response = userService.verifyRegistrationEmail(email, otp);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -95,13 +102,13 @@ public class UserController {
 
     @PatchMapping("disable-account/{userId}")
     public ResponseEntity<Response<Void>> disableAccount(@PathVariable("userId") Long userId) {
-        Response<Void> response = userService.controlAccount(userId, false);
+        Response<Void> response = userService.controlAccount(userId, AccountStatus.DISABLE);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @PatchMapping("enable-account/{userId}")
     public ResponseEntity<Response<Void>> enableAccount(@PathVariable("userId") Long userId) {
-        Response<Void> response = userService.controlAccount(userId, true);
+        Response<Void> response = userService.controlAccount(userId, AccountStatus.ACTIVE);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -7,6 +7,7 @@ import com.TranTienAnh.CoreService.Forms.LoginForm;
 import com.TranTienAnh.CoreService.Forms.PasswordChangingForm;
 import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
+import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 
 import java.util.List;
@@ -30,7 +31,9 @@ public interface UserService {
 
     Response<Void> changeProfile(String email, ProfileChangingForm profileChangingForm);
 
-    Response<Void> controlAccount(Long userId, Boolean isActive);
+    Response<Void> controlAccount(Long userId, AccountStatus accountStatus);
 
     Response<Void> deleteAccount(Long userId);
+
+    Response<Void> verifyRegistrationEmail(String email, String otp);
 }
