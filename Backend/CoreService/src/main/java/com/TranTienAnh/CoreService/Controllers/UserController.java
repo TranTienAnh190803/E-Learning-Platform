@@ -76,7 +76,7 @@ public class UserController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PatchMapping("public/change-forgotten-password{email}/{otp}")
+    @PatchMapping("public/change-forgotten-password/{email}/{otp}")
     public ResponseEntity<Response<Void>> changeForgottenPassword(@PathVariable("email") String email, @PathVariable("otp") String otp, @RequestBody PasswordChangingForm passwordChangingForm) {
         Response<Void> response = userService.changeForgottenPassword(email, otp, passwordChangingForm);
         return ResponseEntity.status(response.getStatusCode()).body(response);

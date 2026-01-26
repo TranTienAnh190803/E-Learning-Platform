@@ -249,7 +249,7 @@ public class UserServiceImpl implements UserService {
             var user = userRepository.findByEmail(email).orElse(null);
             if (user != null) {
                 // Kiểm tra user này đã có Otp trong CSDL chưa (chưa có -> tạo, có rồi -> sửa)
-                var userOtp = userOtpRepository.findByUserId(user.getId()).orElse(null);
+                var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.FORGOT_PASSWORD).orElse(null);
                 String otpCode = "";
                 if (userOtp == null) {
                     // Tạo OTP và lưu vào CSDL
@@ -266,7 +266,6 @@ public class UserServiceImpl implements UserService {
                 else {
                     userOtp.setOtpCode(userOtpService.GenerateOtp());
                     userOtp.setExpiredTime(LocalDateTime.now().plusMinutes(2));
-                    userOtp.setPurpose(OtpPurpose.FORGOT_PASSWORD);
                     userOtpRepository.save(userOtp);
                     otpCode = userOtp.getOtpCode();
                 }
@@ -351,6 +350,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Response<Void> changeForgottenPassword(String email, String otp, PasswordChangingForm passwordChangingForm) {
         Response<Void> response = new Response<>();
 
@@ -361,34 +361,29 @@ public class UserServiceImpl implements UserService {
             return response;
         }
 
-        try {
-            var user = userRepository.findByEmail(email).orElse(null);
+        var user = userRepository.findByEmail(email).orElse(null);
 
-            if (user != null) {
-                var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.FORGOT_PASSWORD).orElse(null);
-                if (userOtp != null && userOtp.getVerified()) {
-                    user.setPassword(passwordEncoder.encode(passwordChangingForm.getNewPassword()));
-                    userRepository.save(user);
+        if (user != null) {
+            var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.FORGOT_PASSWORD).orElse(null);
+            if (userOtp != null && userOtp.getVerified() && !LocalDateTime.now().isAfter(userOtp.getExpiredTime().plusMinutes(2))) {
+                user.setPassword(passwordEncoder.encode(passwordChangingForm.getNewPassword()));
+                userRepository.save(user);
 
-                    response.setSuccess(true);
-                    response.setStatusCode(200);
-                    response.setMessage("Change password successfully.");
-                }
-                else {
-                    response.setSuccess(false);
-                    response.setStatusCode(400);
-                    response.setMessage("Can not change password (OTP haven't verified).");
-                }
+                userOtpRepository.delete(userOtp);
+
+                response.setSuccess(true);
+                response.setStatusCode(200);
+                response.setMessage("Change password successfully.");
+            }
+            else if (userOtp != null && LocalDateTime.now().isAfter(userOtp.getExpiredTime().plusMinutes(2))) {
+                throw new CustomBadRequestException("The password change deadline has passed. Please get new OTP to verify.");
             }
             else {
-                response.setSuccess(false);
-                response.setStatusCode(404);
-                response.setMessage("Can not find User.");
+                throw new CustomBadRequestException("Can not change password (OTP haven't verified).");
             }
-        } catch (Exception e) {
-            response.setSuccess(false);
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
+        }
+        else {
+            throw new CustomNotFoundException("Can not find User.");
         }
 
         return response;
@@ -473,25 +468,17 @@ public class UserServiceImpl implements UserService {
     public Response<Void> controlAccount(Long userId, AccountStatus status) {
         Response<Void> response = new Response<>();
 
-        try {
-            var user = userRepository.findById(userId).orElse(null);
-            if (user != null) {
-                user.setStatus(status);
-                userRepository.save(user);
+        var user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setStatus(status);
+            userRepository.save(user);
 
-                response.setSuccess(true);
-                response.setStatusCode(200);
-                response.setMessage(status == AccountStatus.ACTIVE ? "Enable account successfully" : "Disabled account successfully");
-            }
-            else {
-                response.setSuccess(false);
-                response.setStatusCode(404);
-                response.setMessage("User not found.");
-            }
-        } catch (Exception e) {
-            response.setSuccess(false);
-            response.setStatusCode(500);
-            response.setMessage(e.getMessage());
+            response.setSuccess(true);
+            response.setStatusCode(200);
+            response.setMessage(status == AccountStatus.ACTIVE ? "Enable account successfully" : "Disabled account successfully");
+        }
+        else {
+            throw new CustomNotFoundException("User not found.");
         }
 
         return response;
