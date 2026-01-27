@@ -1,2 +1,61 @@
 @import "tailwindcss";
 
+html{
+    background-color: #DDD;
+}
+
+.input-box{
+    width: 100%;
+    height: 50px;
+    margin: 20px 0px;
+    position: relative;
+}
+
+.input-value{
+    width: 100%;
+    height: 100%;
+    border: 2px solid #EEE;
+    padding: 20px 45px 20px 20px;
+}
+
+.input-value-reverse{
+    width: 100%;
+    height: 100%;
+    border: 2px solid #EEE;
+    padding: 20px 20px 20px 55px;
+}
+
+.input-icon{
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.input-icon-reverse{
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.custom-border{
+    border: 3px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+td{
+    padding: 10px 25px;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+select {
+  appearance: none;
+}

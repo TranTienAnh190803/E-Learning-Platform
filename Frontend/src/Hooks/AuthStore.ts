@@ -27,10 +27,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
             else {
                 localStorage.removeItem("token");
                 set({auth: {status: "guest"}});
+                alert(profile.message);
             }
         }
         else {
-            set({auth: {status: "guest"}})
+            set({auth: {status: "guest"}});
+            alert(response.message);
         }
     },
 
