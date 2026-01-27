@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "../Hooks/AuthStore";
 
 const axiosCoreService = axios.create({
     baseURL: import.meta.env.VITE_CORE_SERVICE
@@ -17,7 +18,15 @@ axiosCoreService.interceptors.request.use(
 
 axiosCoreService.interceptors.response.use(
     (response) => response,
-    (error) => Promise.reject(error)
+    (error) => {
+        if (error.response?.status === 401) {
+            alert("Login session has expired.");
+            useAuthStore.getState().logout();
+            window.location.href = "/login";
+        }
+
+        return error.response
+    }
 )
 
 export default axiosCoreService;

@@ -5,6 +5,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { LoginForm } from "../Types/User.type";
 
 export default function LoginPage() {
+  document.title = "Login";
   // Global State
   const auth = useAuthStore((s) => s.auth);
   const login = useAuthStore((s) => s.login);
