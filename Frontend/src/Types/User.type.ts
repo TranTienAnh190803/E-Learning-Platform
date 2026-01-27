@@ -1,4 +1,4 @@
-// Request Data
+// Request Form
 export interface RegistrationForm {
     fullName: string,
     dateOfBirth: Date,
@@ -15,3 +15,7 @@ export interface LoginForm {
 }
 
 // Response Data
+export interface LoginData {
+    token: string,
+    role: string
+}
