@@ -4,6 +4,7 @@ import LoginPage from "./Pages/LoginPage";
 import HomePage from "./Pages/HomePage";
 import { useEffect } from "react";
 import { useAuthStore } from "./Hooks/AuthStore";
+import RegistrationPage from "./Pages/RegistrationPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
         </Routes>
       </BrowserRouter>
     </>

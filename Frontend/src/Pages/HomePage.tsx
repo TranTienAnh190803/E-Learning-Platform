@@ -12,7 +12,13 @@ export default function HomePage() {
 
   return (
     <div>
-      <button onClick={() => logout()}>Logout</button>
+      <button
+        onClick={() => {
+          logout();
+        }}
+      >
+        Logout
+      </button>
     </div>
   );
 }

@@ -47,7 +47,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     logout: () => {
         localStorage.removeItem("token");
-        set({auth: {status: "guest"}})
+        set({auth: {status: "guest"}});
+        window.location.href = "/login";
     },
 
     initializeAuth: async () => {
@@ -69,6 +70,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
         } catch (error) {
             localStorage.removeItem("token");
             set({auth: {status: "guest"}});
+            alert("Login session has expired");
+            window.location.href = "/login";
         }
     }
 }))

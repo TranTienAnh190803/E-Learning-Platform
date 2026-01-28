@@ -12,6 +12,11 @@ export const registerStudent = async (registrationForm: RegistrationForm): Promi
     return response.data;
 }
 
+export const verifyRegisteredEmail = async (email: string, otpCode: string): Promise<ApiResponse<void>> => {
+    const response = await axios.post<ApiResponse<void>>(`/user-api/public/verify-registration-email/${email}/${otpCode}`);
+    return response.data;
+}
+
 export const login = async (loginForm: LoginForm): Promise<ApiResponse<LoginData>> => {
     const response = await axios.post<ApiResponse<LoginData>>("/user-api/public/login", loginForm);
     return response.data;
