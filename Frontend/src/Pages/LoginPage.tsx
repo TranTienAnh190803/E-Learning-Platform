@@ -35,7 +35,7 @@ export default function LoginPage() {
     <div
       className={`h-screen flex items-center bg-cover bg-center bg-[url(/assets/Login.jpg)]`}
     >
-      <div className="h-full lg:w-2/5 md:w-3/5 sm:w-4/5 flex items-center justify-center border-r-2 border-white rounded-r-[35%] p-8 bg-white/70 backdrop-blur-md">
+      <div className="h-full lg:w-2/5 md:w-3/5 sm:w-4/5 flex items-center justify-center border-r-2 rounded-r-[5%] border-white p-8 bg-white/70 backdrop-blur-md">
         <form className="w-4/5" onSubmit={handleSubmit}>
           <h1 className="text-5xl font-bold text-center">Login</h1>
           <hr className="mt-3 mb-8" />

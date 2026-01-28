@@ -1,8 +1,8 @@
 // Request Form
 export interface RegistrationForm {
     fullName: string,
-    dateOfBirth: Date,
-    gender: boolean,
+    dateOfBirth?: Date,
+    gender?: boolean,
     address: string,
     email: string,
     password: string,
@@ -12,6 +12,11 @@ export interface RegistrationForm {
 export interface LoginForm {
     email: string,
     password: string
+}
+
+export interface VerifyEmailForm {
+    email: string,
+    otpCode: string
 }
 
 // Response Data
