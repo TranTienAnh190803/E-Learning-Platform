@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { useAuthStore } from "../Hooks/AuthStore";
 import { useState } from "react";
-import ResgistrationBox from "../Components/RegistrationBox";
-import EmailVerificationBox from "../Components/EmailOtpVerificationBox";
+import ResgistrationBox from "../Components/RegistrationBox.Registration";
+import EmailVerificationBox from "../Components/OtpVerificationBox.Registration";
 import type { VerifyEmailForm } from "../Types/User.type";
 
 export type RegistrationStage = "information" | "otp";

@@ -38,6 +38,7 @@ export default function ResgistrationBox({
     password: "",
     reEnteredPassword: "",
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleRegistrationObject = (e: React.MouseEvent<HTMLButtonElement>) => {
     const name = (e.target as HTMLButtonElement).name;
@@ -63,6 +64,7 @@ export default function ResgistrationBox({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
 
     let response: ApiResponse<void>;
@@ -79,6 +81,7 @@ export default function ResgistrationBox({
     } else {
       alert(response.message);
     }
+    setLoading(false);
   };
 
   return (
@@ -215,7 +218,10 @@ export default function ResgistrationBox({
           </div>
         </div>
 
-        <button className="font-bold w-full p-3 bg-gray-800 text-white hover:bg-gray-500 hover:text-gray-50 cursor-pointer">
+        <button
+          className="font-bold w-full p-3 bg-gray-800 text-white hover:bg-gray-500 hover:text-gray-50 cursor-pointer"
+          disabled={loading}
+        >
           Register
         </button>
         <p className="mt-3 text-center">

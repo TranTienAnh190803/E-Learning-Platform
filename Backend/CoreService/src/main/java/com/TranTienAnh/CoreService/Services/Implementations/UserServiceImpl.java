@@ -99,6 +99,14 @@ public class UserServiceImpl implements UserService {
             response.setMessage("Please check your mail for OTP.");
         }
         else if (user.getStatus() == AccountStatus.PENDING) {
+            // Lưu thông tin mới của user đăng ký lại
+            user.setAddress(registrationForm.getAddress());
+            user.setGender(registrationForm.getGender());
+            user.setDateOfBirth(registrationForm.getDateOfBirth());
+            user.setFullName(registrationForm.getFullName());
+            user.setRole(role);
+            userRepository.save(user);
+
             var otp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.VERIFY_EMAIL).orElse(null);
             if (otp == null) {
                 UserOtp newOtp = new UserOtp(

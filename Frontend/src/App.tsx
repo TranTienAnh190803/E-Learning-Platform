@@ -5,6 +5,7 @@ import HomePage from "./Pages/HomePage";
 import { useEffect } from "react";
 import { useAuthStore } from "./Hooks/AuthStore";
 import RegistrationPage from "./Pages/RegistrationPage";
+import PasswordRecoveryPage from "./Pages/PasswordRecoveryPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/forgot-password" element={<PasswordRecoveryPage />} />
         </Routes>
       </BrowserRouter>
     </>
