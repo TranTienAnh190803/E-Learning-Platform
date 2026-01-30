@@ -26,7 +26,7 @@ export default function RegistrationPage() {
 
   return (
     <div
-      className={`h-screen flex items-center bg-cover bg-center bg-[url(/assets/Login.jpg)]`}
+      className={`h-screen flex items-center bg-cover bg-center bg-[url(/assets/Register.jpg)]`}
     >
       <div className="h-full lg:w-3/7 md:w-3/5 sm:w-4/5 flex items-center justify-center rounded-r-[5%] border-r-2 border-white p-8 bg-white/70 backdrop-blur-md">
         <div className="w-9/10 px-3 h-[80%] relative">

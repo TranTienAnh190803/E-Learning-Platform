@@ -19,6 +19,16 @@ export interface VerifyEmailForm {
     otpCode: string
 }
 
+export interface PasswordChangingForm {
+    newPassword: string,
+    reEnteredPassword: string
+}
+
+export interface PasswordRecoveryNote {
+    email: string,
+    otpCode: string
+}
+
 // Response Data
 export interface LoginData {
     token: string,
