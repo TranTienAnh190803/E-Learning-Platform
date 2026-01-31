@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../Hooks/AuthStore";
 import type { User } from "../Types/Common.type";
+import Navbar from "../Components/Navbar";
 
 export default function HomePage() {
   // Global State
@@ -19,13 +20,15 @@ export default function HomePage() {
 
   return (
     <div>
-      <button
+      {/* <button
         onClick={() => {
           logout();
         }}
       >
         Logout
-      </button>
+      </button> */}
+      <Navbar />
+      <div></div>
     </div>
   );
 }

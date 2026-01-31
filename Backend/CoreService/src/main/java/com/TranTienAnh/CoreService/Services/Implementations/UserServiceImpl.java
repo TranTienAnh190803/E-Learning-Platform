@@ -211,7 +211,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
     public Response<UserDto> getProfile(String email) {
         Response<UserDto> response = new Response<>();
 
