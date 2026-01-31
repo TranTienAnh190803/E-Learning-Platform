@@ -41,3 +41,23 @@ export const recoverPassword = async (email: string, otpCode: string, passwordCh
     const response = await axios.patch(`/user-api/public/change-forgotten-password/${email}/${otpCode}`, passwordChangingForm);
     return response.data;
 }
+
+export const getAllUser = async (): Promise<ApiResponse<User[]>> => {
+    const response = await axios.get<ApiResponse<User[]>>("/user-api/all-user");
+    return response.data;
+}
+
+export const disableUser = async (userId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.patch(`/user-api/disable-account/${userId}`);
+    return response.data;
+}
+
+export const enableUser = async (userId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.patch(`/user-api/enable-account/${userId}`);
+    return response.data;
+}
+
+export const deleteUser = async (userId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.delete(`/user-api/delete-account/${userId}`);
+    return response.data;
+}

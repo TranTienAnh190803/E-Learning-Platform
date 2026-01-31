@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "../Hooks/AuthStore";
 import type { User } from "../Types/Common.type";
 import Navbar from "../Components/Navbar";
+import { isAdmin } from "../Helper/CheckRole";
+import UserManagement from "../Components/UserManagement";
 
 export default function HomePage() {
+  document.title = "E-Learning";
   // Global State
   const auth = useAuthStore((s) => s.auth);
   const logout = useAuthStore((s) => s.logout);
@@ -28,7 +31,10 @@ export default function HomePage() {
         Logout
       </button> */}
       <Navbar />
-      <div></div>
+      {/* Admin Home */}
+      {auth.status === "authenticated" && isAdmin(auth.user.role) && (
+        <UserManagement />
+      )}
     </div>
   );
 }
