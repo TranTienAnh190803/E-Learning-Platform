@@ -1,6 +1,6 @@
 import axios from "../../Configurations/AxiosCoreService.ts";
 import type { ApiResponse, User } from "../../Types/Common.type.ts";
-import type { LoginData, LoginForm, PasswordChangingForm, RegistrationForm } from "../../Types/User.type.ts";
+import type { LoginData, LoginForm, PasswordChangingForm, RegistrationForm, RoleFilter } from "../../Types/User.type.ts";
 
 export const registerInstructor = async (registrationForm: RegistrationForm): Promise<ApiResponse<void>> => {
     const response = await axios.post<ApiResponse<void>>("/user-api/public/instructor-registration", registrationForm);
@@ -59,5 +59,15 @@ export const enableUser = async (userId: number): Promise<ApiResponse<void>> => 
 
 export const deleteUser = async (userId: number): Promise<ApiResponse<void>> => {
     const response = await axios.delete(`/user-api/delete-account/${userId}`);
+    return response.data;
+}
+
+export const searchUser = async (email: string): Promise<ApiResponse<User[]>> => {
+    const response = await axios.get<ApiResponse<User[]>>(`/user-api/search-account/${email}`);
+    return response.data;
+}
+
+export const filterUser = async (role: RoleFilter): Promise<ApiResponse<User[]>> => {
+    const response = await axios.get<ApiResponse<User[]>>(`/user-api/filter-account/${role}`);
     return response.data;
 }

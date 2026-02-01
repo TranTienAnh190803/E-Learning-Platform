@@ -117,4 +117,16 @@ public class UserController {
         Response<Void> response = userService.deleteAccount(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("search-account/{email}")
+    public ResponseEntity<Response<List<UserDto>>> searchAccount(@PathVariable("email") String email) {
+        Response<List<UserDto>> response = userService.searchAccount(email);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("filter-account/{role}")
+    public ResponseEntity<Response<List<UserDto>>> filterAccount(@PathVariable("role") Role role) {
+        Response<List<UserDto>> response = userService.filterAccount(role);
+        return ResponseEntity.ok(response);
+    }
 }

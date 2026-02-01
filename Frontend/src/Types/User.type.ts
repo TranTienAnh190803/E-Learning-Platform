@@ -29,6 +29,8 @@ export interface PasswordRecoveryNote {
     otpCode: string
 }
 
+export type RoleFilter = "ALL" | "INSTRUCTOR" | "STUDENT"
+
 // Response Data
 export interface LoginData {
     token: string,

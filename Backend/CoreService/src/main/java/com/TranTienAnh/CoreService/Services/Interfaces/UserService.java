@@ -36,4 +36,8 @@ public interface UserService {
     Response<Void> deleteAccount(Long userId);
 
     Response<Void> verifyRegistrationEmail(String email, String otp);
+
+    Response<List<UserDto>> searchAccount(String email);
+
+    Response<List<UserDto>> filterAccount(Role role);
 }

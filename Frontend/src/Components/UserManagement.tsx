@@ -1,18 +1,25 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaAngleDown, FaCircle, FaSearch } from "react-icons/fa";
 import type { User } from "../Types/Common.type";
-import { getAllUser } from "../Services/CoreService/UserApi";
+import {
+  deleteUser,
+  disableUser,
+  enableUser,
+  filterUser,
+  getAllUser,
+  searchUser,
+} from "../Services/CoreService/UserApi";
 import { dateFormat } from "../Helper/Converter";
 import { IoIosMore } from "react-icons/io";
+import type { RoleFilter } from "../Types/User.type";
 
 export default function UserManagement() {
-  type Role = "ALL" | "INSTRUCTOR" | "STUDENT";
-  const [role, setRole] = useState<Role>("ALL");
+  const [email, setEmail] = useState<string>("");
   const [userList, setUserList] = useState<User[]>([]);
   // id of the row whose menu is open; null when none are open
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
 
-  // Close the open menu when clicking anywhere outside
+  // Đóng menu (đang mở) khi click chuột vào bất kỳ đâu bên ngoài menu đó
   useEffect(() => {
     const handleDocClick = () => setOpenMenuId(null);
     document.addEventListener("click", handleDocClick);
@@ -29,17 +36,75 @@ export default function UserManagement() {
     fetchAllUser();
   }, []);
 
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+  };
+
+  const handleSearchUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (email.length === 0) fetchAllUser();
+    else {
+      const response = await searchUser(email);
+      if (response.success) {
+        setUserList(response.data!);
+      } else {
+        alert(response.message);
+      }
+    }
+  };
+
+  const handleFilterUser = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === ("ALL" as RoleFilter)) fetchAllUser();
+    else {
+      const response = await filterUser(value as RoleFilter);
+      if (response.success) {
+        setUserList(response.data!);
+      } else {
+        alert(response.message);
+      }
+    }
+  };
+
+  const handleControlAccount = async (userId: number, statusNumber: number) => {
+    let response;
+
+    if (statusNumber === 0) response = await disableUser(userId);
+    if (statusNumber === 2) response = await enableUser(userId);
+
+    alert(response?.message);
+    if (response?.success) {
+      setOpenMenuId(null);
+      fetchAllUser();
+    }
+  };
+
+  const handleDeleteAccount = async (userId: number) => {
+    if (confirm("Are you sure you want to DELETE this account?")) {
+      const response = await deleteUser(userId);
+
+      alert(response.message);
+      if (response.success) {
+        setOpenMenuId(null);
+        fetchAllUser();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen handle-navbar bg-white">
       <div className="px-25 py-10 flex justify-between items-center gap-[10%] border-b-3 border-gray-200">
         <h1 className="text-5xl font-bold w-2/3">User Management</h1>
-        <form className="input-box w-[50%]!">
+        <form className="input-box w-[50%]!" onSubmit={handleSearchUser}>
           <input
-            type="email"
+            type="text"
             placeholder="Search"
             className="input-value-reverse font-bold"
-            name="reEnteredPassword"
-            required
+            name="email"
+            value={email}
+            onChange={handleInputChange}
           />
           <FaSearch className="input-icon-reverse" />
         </form>
@@ -47,14 +112,14 @@ export default function UserManagement() {
           <select
             name="role"
             className="input-value p-0! pl-[20px]! pr-[45px]! font-bold"
-            value={role}
+            onChange={handleFilterUser}
             required
           >
-            <option value={"ALL" as Role} selected>
+            <option value={"ALL" as RoleFilter} selected>
               All
             </option>
-            <option value={"INSTRUCTOR" as Role}>Instructor</option>
-            <option value={"STUDENT" as Role}>Student</option>
+            <option value={"INSTRUCTOR" as RoleFilter}>Instructor</option>
+            <option value={"STUDENT" as RoleFilter}>Student</option>
           </select>
           <FaAngleDown
             className="input-icon"
@@ -95,11 +160,9 @@ export default function UserManagement() {
                     <td className="place-items-center">
                       {
                         <FaCircle
-                          className={
-                            value.statusNumber === 0
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }
+                          className={`${value.statusNumber === 0 && "text-green-500"}
+                            ${value.statusNumber === 1 && "text-yellow-500"}
+                            ${value.statusNumber === 2 && "text-red-500"}`}
                         />
                       }
                     </td>
@@ -126,13 +189,18 @@ export default function UserManagement() {
                           >
                             <button
                               className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                              onClick={() => console.log("View", value.id)}
+                              onClick={() =>
+                                handleControlAccount(
+                                  value.id,
+                                  value.statusNumber,
+                                )
+                              }
                             >
                               {value.statusNumber === 0 ? "Disable" : "Enable"}
                             </button>
                             <button
                               className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
-                              onClick={() => console.log("Delete", value.id)}
+                              onClick={() => handleDeleteAccount(value.id)}
                             >
                               Delete
                             </button>

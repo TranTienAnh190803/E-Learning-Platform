@@ -548,4 +548,37 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public Response<List<UserDto>> searchAccount(String email) {
+        Response<List<UserDto>> response = new Response<>();
+
+        var result = userRepository.searchUser(email).stream()
+                .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
+                .toList();
+
+        response.setStatusCode(200);
+        response.setSuccess(true);
+        response.setData(result);
+
+
+        return response;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public Response<List<UserDto>> filterAccount(Role role) {
+        Response<List<UserDto>> response = new Response<>();
+
+        var result = userRepository.findByRole(role).stream()
+                .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
+                .toList();
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setData(result);
+
+        return response;
+    }
 }
