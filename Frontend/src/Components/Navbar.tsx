@@ -1,11 +1,27 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../Hooks/AuthStore";
-import { isAdmin } from "../Helper/CheckRole";
+import { isAdmin, isInstructor, isStudent } from "../Helper/CheckRole";
 import { IoExit } from "react-icons/io5";
+import { FaAngleDown, FaAt, FaBell, FaBook, FaUser } from "react-icons/fa";
+import { LuMessageCircleMore } from "react-icons/lu";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const auth = useAuthStore((s) => s.auth);
   const logout = useAuthStore((s) => s.logout);
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
+
+  const handleDocClick = () => {
+    setOpenMenu(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleDocClick);
+
+    return () => {
+      document.removeEventListener("click", handleDocClick);
+    };
+  }, []);
 
   return (
     <div className="h-25 px-25 fixed top-0 left-0 right-0 flex justify-between items-center bg-black shadow-xl/20 z-1000">
@@ -45,6 +61,75 @@ export default function Navbar() {
         </button>
       )}
       {/* Instructor & Student Navbar */}
+      {auth.status === "authenticated" && !isAdmin(auth.user.role) && (
+        <div className="flex justify-between items-center text-white">
+          <div className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer">
+            <FaBell />
+          </div>
+          <div className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer">
+            <LuMessageCircleMore />
+          </div>
+          <div className="relative">
+            <div
+              className="px-3 py-2 flex items-center rounded-4xl bg-gray-800 hover:bg-gray-900 hover:text-gray-300 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenu((prev) => !prev);
+              }}
+            >
+              <div className="mr-3 rounded-full h-[45px] text-3xl overflow-hidden">
+                <img src="assets/User.jpg" className="h-full " />
+              </div>
+              <h1 className="font-bold mr-5">{auth.user.fullName}</h1>
+              <div>
+                <FaAngleDown />
+              </div>
+            </div>
+            {openMenu && (
+              <div
+                className="absolute right-0 top-15 min-w-[380px] bg-white text-black rounded-2xl overflow-hidden"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <div className="flex items-start py-5 px-3 border-b-1 border-gray-300">
+                  <div className="h-[80px] rounded-full overflow-hidden border-1 border-gray-300">
+                    <img src="assets/User.jpg" className="h-full" />
+                  </div>
+                  <div className="ml-3">
+                    <h1 className="font-bold text-3xl">{auth.user.fullName}</h1>
+                    <h1 className="font-light text-sm">{auth.user.email}</h1>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                    <FaUser className="mr-3" /> Profile
+                  </div>
+                  {isStudent(auth.user.role) && (
+                    <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                      <FaBook className="mr-3" /> Courses
+                    </div>
+                  )}
+                  {isInstructor(auth.user.role) && (
+                    <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                      <FaBook className="mr-3" /> My Courses
+                    </div>
+                  )}
+                  <div className="flex items-center py-3 px-5 border-b-1 border-gray-300 hover:bg-gray-300 cursor-pointer">
+                    <FaAt className="mr-3" /> Account
+                  </div>
+                  <div
+                    className="flex items-center py-3 px-5 text-red-500 hover:bg-gray-300 cursor-pointer"
+                    onClick={() => logout()}
+                  >
+                    <IoExit className="mr-3" /> Logout
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import type { User } from "../Types/Common.type";
 import Navbar from "../Components/Navbar";
 import { isAdmin } from "../Helper/CheckRole";
 import UserManagement from "../Components/UserManagement";
+import Footer from "../Components/Footer";
 
 export default function HomePage() {
   document.title = "E-Learning";
@@ -32,9 +33,12 @@ export default function HomePage() {
       </button> */}
       <Navbar />
       {/* Admin Home */}
-      {auth.status === "authenticated" && isAdmin(auth.user.role) && (
-        <UserManagement />
-      )}
+      <div className="min-h-screen">
+        {auth.status === "authenticated" && isAdmin(auth.user.role) && (
+          <UserManagement />
+        )}
+      </div>
+      <Footer />
     </div>
   );
 }
