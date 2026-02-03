@@ -14,7 +14,7 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Cho phép truy cập đường dẫn upload/avatar (public đường dẫn)
-        registry.addResourceHandler("/avatar/**")
+        registry.addResourceHandler("/uploads/avatar/**")
                 .addResourceLocations("file:" + uploadDir + "/avatar/");
     }
 }

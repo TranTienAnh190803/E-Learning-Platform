@@ -24,10 +24,10 @@ public class UserDto {
 
     private int statusNumber;
 
+    private String avatar;
+
     // Constructor
-
-
-    public UserDto(Long id, String fullName, Boolean gender, LocalDate dateOfBirth, String address, String role, String email, String status, int statusNumber) {
+    public UserDto(Long id, String fullName, Boolean gender, LocalDate dateOfBirth, String address, String role, String email, String status, int statusNumber, String avatar) {
         this.id = id;
         this.fullName = fullName;
         this.gender = gender;
@@ -37,6 +37,7 @@ public class UserDto {
         this.email = email;
         this.status = status;
         this.statusNumber = statusNumber;
+        this.avatar = avatar;
     }
 
     // Getter & Setter
@@ -110,5 +111,13 @@ public class UserDto {
 
     public void setStatusNumber(int statusNumber) {
         this.statusNumber = statusNumber;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

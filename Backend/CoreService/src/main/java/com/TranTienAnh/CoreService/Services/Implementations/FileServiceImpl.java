@@ -61,6 +61,6 @@ public class FileServiceImpl implements FileService {
 
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return filePath.toString();
+        return filePath.toString().replace("\\", "/");
     }
 }

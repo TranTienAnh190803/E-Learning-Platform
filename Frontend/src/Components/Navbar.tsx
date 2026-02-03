@@ -78,7 +78,14 @@ export default function Navbar() {
               }}
             >
               <div className="mr-3 rounded-full h-[45px] text-3xl overflow-hidden">
-                <img src="assets/User.jpg" className="h-full " />
+                <img
+                  src={
+                    auth.user.avatar === null
+                      ? "assets/User.jpg"
+                      : auth.user.avatar
+                  }
+                  className="h-full "
+                />
               </div>
               <h1 className="font-bold mr-5">{auth.user.fullName}</h1>
               <div>
@@ -94,7 +101,14 @@ export default function Navbar() {
               >
                 <div className="flex items-start py-5 px-3 border-b-1 border-gray-300">
                   <div className="h-[80px] rounded-full overflow-hidden border-1 border-gray-300">
-                    <img src="assets/User.jpg" className="h-full" />
+                    <img
+                      src={
+                        auth.user.avatar === null
+                          ? "assets/User.jpg"
+                          : auth.user.avatar
+                      }
+                      className="h-full"
+                    />
                   </div>
                   <div className="ml-3">
                     <h1 className="font-bold text-3xl">{auth.user.fullName}</h1>
@@ -102,22 +116,34 @@ export default function Navbar() {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                  <Link
+                    to={"/profile"}
+                    className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer"
+                  >
                     <FaUser className="mr-3" /> Profile
-                  </div>
+                  </Link>
                   {isStudent(auth.user.role) && (
-                    <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                    <Link
+                      to={"/course"}
+                      className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer"
+                    >
                       <FaBook className="mr-3" /> Courses
-                    </div>
+                    </Link>
                   )}
                   {isInstructor(auth.user.role) && (
-                    <div className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer">
+                    <Link
+                      to={"/my-course"}
+                      className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer"
+                    >
                       <FaBook className="mr-3" /> My Courses
-                    </div>
+                    </Link>
                   )}
-                  <div className="flex items-center py-3 px-5 border-b-1 border-gray-300 hover:bg-gray-300 cursor-pointer">
+                  <Link
+                    to={"/account"}
+                    className="flex items-center py-3 px-5 border-b-1 border-gray-300 hover:bg-gray-300 cursor-pointer"
+                  >
                     <FaAt className="mr-3" /> Account
-                  </div>
+                  </Link>
                   <div
                     className="flex items-center py-3 px-5 text-red-500 hover:bg-gray-300 cursor-pointer"
                     onClick={() => logout()}

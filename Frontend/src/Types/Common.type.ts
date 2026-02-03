@@ -16,7 +16,8 @@ export interface User {
     role: string,
     email: string,
     status: string,
-    statusNumber: number
+    statusNumber: number,
+    avatar: string | null
 }
 
 export type AuthState =

@@ -21,6 +21,7 @@ import com.TranTienAnh.CoreService.Services.Interfaces.UserOtpService;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserService;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -59,6 +61,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private FileService fileService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Override
     @Transactional
@@ -202,7 +207,13 @@ public class UserServiceImpl implements UserService {
         try {
             var userList = userRepository.findByRoleIn(List.of(Role.STUDENT, Role.INSTRUCTOR))
                     .stream()
-                    .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
+                    .map(u -> {
+                        String avatar = null;
+                        if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank()) {
+                            avatar = baseUrl + "/" + u.getAvatarPath();
+                        }
+                        return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
+                    })
                     .collect(Collectors.toList());
             response.setStatusCode(200);
             response.setSuccess(true);
@@ -228,6 +239,10 @@ public class UserServiceImpl implements UserService {
                 response.setMessage("User information not found");
             }
             else {
+                String avatar = null;
+                if (user.getAvatarPath() != null && !user.getAvatarPath().isBlank())
+                    avatar = baseUrl + "/" + user.getAvatarPath();
+
                 UserDto userDto = new UserDto(
                         user.getId(),
                         user.getFullName(),
@@ -237,7 +252,8 @@ public class UserServiceImpl implements UserService {
                         user.getRole().name(),
                         user.getEmail(),
                         user.getStatus().name(),
-                        user.getStatus().getValue()
+                        user.getStatus().getValue(),
+                        avatar
                 );
 
                 response.setSuccess(true);
@@ -561,7 +577,12 @@ public class UserServiceImpl implements UserService {
         Response<List<UserDto>> response = new Response<>();
 
         var result = userRepository.searchUser(email).stream()
-                .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
+                .map(u -> {
+                    String avatar = null;
+                    if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank())
+                        avatar = baseUrl + "/" + u.getAvatarPath();
+                    return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
+                })
                 .toList();
 
         response.setStatusCode(200);
@@ -578,7 +599,12 @@ public class UserServiceImpl implements UserService {
         Response<List<UserDto>> response = new Response<>();
 
         var result = userRepository.findByRole(role).stream()
-                .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue()))
+                .map(u -> {
+                    String avatar = null;
+                    if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank())
+                        avatar = baseUrl + "/" + u.getAvatarPath();
+                    return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
+                })
                 .toList();
 
         response.setSuccess(true);
