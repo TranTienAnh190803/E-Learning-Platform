@@ -9,7 +9,9 @@ import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -40,4 +42,6 @@ public interface UserService {
     Response<List<UserDto>> searchAccount(String email);
 
     Response<List<UserDto>> filterAccount(Role role);
+
+    Response<Void> uploadAvatar(MultipartFile file, String email) throws IOException;
 }

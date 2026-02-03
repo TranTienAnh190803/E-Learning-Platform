@@ -44,6 +44,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private AccountStatus status;
 
+    private String avatarPath;
+
     public User() {
     }
 
@@ -124,6 +126,14 @@ public class User implements UserDetails {
 
     public void setStatus(AccountStatus status) {
         this.status = status;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
     }
 
     // User Detail Implementation

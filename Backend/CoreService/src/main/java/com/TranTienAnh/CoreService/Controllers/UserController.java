@@ -16,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -127,6 +129,15 @@ public class UserController {
     @GetMapping("filter-account/{role}")
     public ResponseEntity<Response<List<UserDto>>> filterAccount(@PathVariable("role") Role role) {
         Response<List<UserDto>> response = userService.filterAccount(role);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("upload-avatar")
+    public ResponseEntity<Response<Void>> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = userService.uploadAvatar(file, email);
         return ResponseEntity.ok(response);
     }
 }

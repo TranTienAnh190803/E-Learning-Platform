@@ -16,6 +16,7 @@ import com.TranTienAnh.CoreService.Models.Enums.OtpPurpose;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.UserOtpRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
+import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserOtpService;
 import com.TranTienAnh.CoreService.Services.Interfaces.UserService;
 import org.apache.coyote.BadRequestException;
@@ -26,7 +27,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,6 +56,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserOtpService userOtpService;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     @Transactional
@@ -578,6 +584,23 @@ public class UserServiceImpl implements UserService {
         response.setSuccess(true);
         response.setStatusCode(200);
         response.setData(result);
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> uploadAvatar(MultipartFile file, String email) throws IOException {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        String path = fileService.saveAvatar(file, user.getId());
+
+        user.setAvatarPath(path);
+        userRepository.save(user);
+
+        response.setStatusCode(200);
+        response.setSuccess(true);
+        response.setMessage("Upload avatar successfully");
 
         return response;
     }
