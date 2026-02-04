@@ -44,4 +44,10 @@ public interface UserService {
     Response<List<UserDto>> filterAccount(Role role);
 
     Response<Void> uploadAvatar(MultipartFile file, String email) throws IOException;
+
+    Response<Void> otpChangeEmail(String email) throws Exception;
+
+    Response<Void> verifyChangeEmail(String email, String otpCode, String newEmail);
+
+    Response<Void> deleteUserAccount(String email);
 }

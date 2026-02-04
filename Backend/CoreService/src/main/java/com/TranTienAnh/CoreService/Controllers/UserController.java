@@ -140,4 +140,31 @@ public class UserController {
         Response<Void> response = userService.uploadAvatar(file, email);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("otp-change-email")
+    public ResponseEntity<Response<Void>> otpChangeEmail() throws Exception {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = userService.otpChangeEmail(email);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("verify-change-email/{otpCode}/{newEmail}")
+    public ResponseEntity<Response<Void>> verifyChangeEmail(@PathVariable("otpCode") String otpCode, @PathVariable("newEmail") String newEmail) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = userService.verifyChangeEmail(email, otpCode, newEmail);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("delete-user-account")
+    public ResponseEntity<Response<Void>> deleteUserAccount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = userService.deleteUserAccount(email);
+        return ResponseEntity.ok(response);
+    }
 }

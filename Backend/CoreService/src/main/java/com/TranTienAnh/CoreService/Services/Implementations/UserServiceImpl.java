@@ -631,4 +631,76 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
+    public Response<Void> otpChangeEmail(String email) throws Exception {
+        Response<Void> response = new Response<>();
+
+        if (userRepository.existsByEmail(email))
+            throw new CustomBadRequestException("Email has already been used");
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        String otp = userOtpService.GenerateOtp();
+        UserOtp userOtp = new UserOtp(
+                otp,
+                false,
+                LocalDateTime.now().plusMinutes(2),
+                OtpPurpose.CHANGE_EMAIL,
+                user
+        );
+        userOtpRepository.save(userOtp);
+
+        String template = mailService.loadHtmlTemplate("OtpChangeEmailTemplate.html");
+        template = template.replace("{{OtpCode}}", otp);
+        mailService.sendMail(
+                "elearning@system.com",
+                email,
+                "Change Email OTP",
+                template
+        );
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("The OTP code has been sent to your email.");
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> verifyChangeEmail(String email, String otpCode, String newEmail) {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        var userOtp = userOtpRepository.findByUserIdAndPurpose(user.getId(), OtpPurpose.CHANGE_EMAIL).orElseThrow(() -> new CustomNotFoundException("You haven't registered OTP"));
+
+        if (userOtp.getOtpCode().equals(otpCode) && !LocalDateTime.now().isAfter(userOtp.getExpiredTime())) {
+            user.setEmail(newEmail);
+            userRepository.save(user);
+        }
+        else if (!userOtp.getOtpCode().equals(otpCode))
+            throw new CustomBadRequestException("Wrong OTP");
+        else
+            throw new CustomBadRequestException("OTP expired");
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Change email successfully.");
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> deleteUserAccount(String email) {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        userRepository.delete(user);
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Delete account successfully.");
+
+        return response;
+    }
 }
