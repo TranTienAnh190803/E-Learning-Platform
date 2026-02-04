@@ -31,6 +31,13 @@ export interface PasswordRecoveryNote {
 
 export type RoleFilter = "ALL" | "INSTRUCTOR" | "STUDENT"
 
+export interface ProfileChangingForm {
+    fullName: string,
+    gender: boolean,
+    dateOfBirth: Date,
+    address: string
+}
+
 // Response Data
 export interface LoginData {
     token: string,

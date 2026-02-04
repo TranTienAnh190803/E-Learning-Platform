@@ -1,6 +1,6 @@
 import type { SetStateAction } from "react";
 import type React from "react";
-import { FaAt, FaMailBulk, FaUser } from "react-icons/fa";
+import { FaAt, FaUser } from "react-icons/fa";
 import { FaShield } from "react-icons/fa6";
 import { IoWarning } from "react-icons/io5";
 import type { Selection } from "../Pages/AccountPage";
@@ -12,7 +12,7 @@ interface Props {
 
 export default function Sidebar({ selection, setSelection }: Props) {
   return (
-    <div className="w-1/4 bg-white p-9">
+    <div className="w-1/4 bg-white p-9 border-r-2 border-gray-200">
       <h1 className="font-bold text-3xl">Account management</h1>
       <div className="mt-10">
         <div
@@ -43,13 +43,15 @@ export default function Sidebar({ selection, setSelection }: Props) {
           <p>Change Password</p>
         </div>
         <div
-          className={`group flex items-center font-light p-3 rounded-xl hover:bg-gray-200 hover:font-normal cursor-pointer ${selection === "delete" && "bg-gray-300! font-bold!"}`}
+          className={`group flex items-center font-light p-3 rounded-xl hover:bg-red-200 hover:font-normal cursor-pointer ${selection === "delete" && "bg-red-300! font-bold!"}`}
           onClick={() => setSelection("delete")}
         >
           <IoWarning
-            className={`mr-3 text-gray-500 group-hover:text-gray-900 ${selection === "delete" && "text-black!"}`}
+            className={`mr-3 text-red-500 group-hover:text-red-900 ${selection === "delete" && "text-red!"}`}
           />
-          <p>Delete Account</p>
+          <p className="text-red-500 group-hover:text-red-900">
+            Delete Account
+          </p>
         </div>
       </div>
     </div>

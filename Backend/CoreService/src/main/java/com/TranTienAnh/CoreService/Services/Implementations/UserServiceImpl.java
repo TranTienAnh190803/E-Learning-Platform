@@ -615,6 +615,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
     public Response<Void> uploadAvatar(MultipartFile file, String email) throws IOException {
         Response<Void> response = new Response<>();
 

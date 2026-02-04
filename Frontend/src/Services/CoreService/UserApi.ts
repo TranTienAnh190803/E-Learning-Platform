@@ -1,6 +1,6 @@
 import axios from "../../Configurations/AxiosCoreService.ts";
 import type { ApiResponse, User } from "../../Types/Common.type.ts";
-import type { LoginData, LoginForm, PasswordChangingForm, RegistrationForm, RoleFilter } from "../../Types/User.type.ts";
+import type { LoginData, LoginForm, PasswordChangingForm, ProfileChangingForm, RegistrationForm, RoleFilter } from "../../Types/User.type.ts";
 
 export const registerInstructor = async (registrationForm: RegistrationForm): Promise<ApiResponse<void>> => {
     const response = await axios.post<ApiResponse<void>>("/user-api/public/instructor-registration", registrationForm);
@@ -69,5 +69,25 @@ export const searchUser = async (email: string): Promise<ApiResponse<User[]>> =>
 
 export const filterUser = async (role: RoleFilter): Promise<ApiResponse<User[]>> => {
     const response = await axios.get<ApiResponse<User[]>>(`/user-api/filter-account/${role}`);
+    return response.data;
+}
+
+export const changePersonalInfo = async (profilChangingForm: ProfileChangingForm): Promise<ApiResponse<void>> => {
+    const response = await axios.put("/user-api/change-profile", profilChangingForm);
+    return response.data;
+}
+
+export const changeAvatar = async (formData: FormData): Promise<ApiResponse<void>> => {
+    const response = await axios.post("/user-api/upload-avatar", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
+
+    return response.data;
+}
+
+export const changeUserPassword = async (passwordForm: PasswordChangingForm, oldPassword: string): Promise<ApiResponse<void>> => {
+    const response = await axios.patch(`/user-api/change-password/${oldPassword}`, passwordForm);
     return response.data;
 }

@@ -84,7 +84,7 @@ export default function Navbar() {
                       ? "assets/User.jpg"
                       : auth.user.avatar
                   }
-                  className="h-full "
+                  className="h-full aspect-square"
                 />
               </div>
               <h1 className="font-bold mr-5">{auth.user.fullName}</h1>
@@ -94,7 +94,7 @@ export default function Navbar() {
             </div>
             {openMenu && (
               <div
-                className="absolute right-0 top-15 min-w-[380px] bg-white text-black rounded-2xl overflow-hidden"
+                className="absolute right-0 top-15 min-w-[380px] bg-white text-black rounded-2xl overflow-hidden shadow-xl/15"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
@@ -107,7 +107,7 @@ export default function Navbar() {
                           ? "assets/User.jpg"
                           : auth.user.avatar
                       }
-                      className="h-full"
+                      className="h-full aspect-square"
                     />
                   </div>
                   <div className="ml-3">
