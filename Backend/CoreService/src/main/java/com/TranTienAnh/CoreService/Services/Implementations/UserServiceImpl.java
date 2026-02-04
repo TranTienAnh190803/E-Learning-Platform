@@ -685,7 +685,7 @@ public class UserServiceImpl implements UserService {
 
         response.setSuccess(true);
         response.setStatusCode(200);
-        response.setMessage("Change email successfully.");
+        response.setMessage("Change email successfully, please login again.");
 
         return response;
     }

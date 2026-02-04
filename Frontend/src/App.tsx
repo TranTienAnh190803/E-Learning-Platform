@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "./Hooks/AuthStore";
 import RegistrationPage from "./Pages/RegistrationPage";
 import PasswordRecoveryPage from "./Pages/PasswordRecoveryPage";
-import { isInstructor } from "./Helper/CheckRole";
+import { isInstructor, isStudent } from "./Helper/CheckRole";
 import AccountPage from "./Pages/AccountPage";
 
 function App() {
@@ -26,7 +26,15 @@ function App() {
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/forgot-password" element={<PasswordRecoveryPage />} />
 
+          {/* INSTRUCTOR PAGE */}
           {auth.status === "authenticated" && isInstructor(auth.user.role) && (
+            <>
+              <Route path="/account" element={<AccountPage />} />
+            </>
+          )}
+
+          {/* STUDENT PAGE */}
+          {auth.status === "authenticated" && isStudent(auth.user.role) && (
             <>
               <Route path="/account" element={<AccountPage />} />
             </>

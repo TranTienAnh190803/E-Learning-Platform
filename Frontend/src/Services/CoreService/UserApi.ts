@@ -91,3 +91,18 @@ export const changeUserPassword = async (passwordForm: PasswordChangingForm, old
     const response = await axios.patch(`/user-api/change-password/${oldPassword}`, passwordForm);
     return response.data;
 }
+
+export const otpChangeEmail = async (): Promise<ApiResponse<void>> => {
+    const response = await axios.post("/user-api/otp-change-email");
+    return response.data;
+}
+
+export const verifyChangeEmail = async (otpCode: string, newEmail: string): Promise<ApiResponse<void>> => {
+    const response = await axios.post(`/user-api/verify-change-email/${otpCode}/${newEmail}`);
+    return response.data;
+}
+
+export const deleteUserAccount = async (): Promise<ApiResponse<void>> => {
+    const response = await axios.delete("/user-api/delete-user-account");
+    return response.data;
+}
