@@ -3,12 +3,8 @@ import {
   otpChangeEmail,
   verifyChangeEmail,
 } from "../Services/CoreService/UserApi";
-import { useAuthStore } from "../Hooks/AuthStore";
 
 export default function EmailChanging() {
-  // Global State
-  const logout = useAuthStore((s) => s.logout);
-
   // Local State
   const [verifyPhase, setVerifyPhase] = useState<boolean>(false);
   const [newEmail, setNewEmail] = useState<string>("");
@@ -20,9 +16,10 @@ export default function EmailChanging() {
   const handleChangeBtn = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await otpChangeEmail();
+    const response = await otpChangeEmail(newEmail);
     if (response.success) {
       setVerifyPhase(true);
+      setChangingForm({ ...changingForm, newEmail: newEmail });
     } else {
       alert(response.message);
     }
@@ -36,7 +33,10 @@ export default function EmailChanging() {
       changingForm.otpCode,
     );
     alert(response.message);
-    if (response.success) logout();
+    if (response.success) {
+      localStorage.setItem("token", response.data?.token!);
+      window.location.reload();
+    }
   };
 
   return (

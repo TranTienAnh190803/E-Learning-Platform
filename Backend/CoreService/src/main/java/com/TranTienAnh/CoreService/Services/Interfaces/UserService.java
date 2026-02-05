@@ -45,9 +45,9 @@ public interface UserService {
 
     Response<Void> uploadAvatar(MultipartFile file, String email) throws IOException;
 
-    Response<Void> otpChangeEmail(String email) throws Exception;
+    Response<Void> otpChangeEmail(String email, String newEmail) throws Exception;
 
-    Response<Void> verifyChangeEmail(String email, String otpCode, String newEmail);
+    Response<JwtResponseDto> verifyChangeEmail(String email, String otpCode, String newEmail);
 
     Response<Void> deleteUserAccount(String email);
 }
