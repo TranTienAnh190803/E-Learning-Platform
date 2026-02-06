@@ -12,7 +12,9 @@ import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,26 +30,38 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
+    @Transactional
     public Response<Void> addCourse(String email, CourseForm courseForm) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
 
-        String image = null;
-        if (courseForm.getImage() != null)
-            image = fileService.saveImage(courseForm.getImage(), user.getId(), "course");
+        String password = null;
+        if (!courseForm.getPublic())
+            password = passwordEncoder.encode(courseForm.getPassword());
 
         Course course = new Course(
                 courseForm.getTitle(),
                 courseForm.getDescription(),
                 CourseStatus.New,
                 courseForm.getResults(),
-                image,
+                courseForm.getPublic(),
+                password,
                 user
         );
-        courseRepository.save(course);
+        var newCourse = courseRepository.save(course);
+
+        String image = null;
+        if (courseForm.getImage() != null) {
+            image = fileService.saveImage(courseForm.getImage(), user.getId(), "course");
+            newCourse.setImageUrl(image);
+            courseRepository.save(newCourse);
+        }
 
         response.setSuccess(true);
         response.setStatusCode(200);
@@ -107,6 +121,11 @@ public class CourseServiceImpl implements CourseService {
             course.setImageUrl(image);
         }
 
+        if (courseForm.getPublic())
+            course.setPassword(null);
+        else
+            course.setPassword(passwordEncoder.encode(courseForm.getPassword()));
+
         course.setTitle(courseForm.getTitle());
         course.setDescription(courseForm.getDescription());
         course.setResults(courseForm.getResults());
@@ -136,6 +155,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     public Response<List<CourseDto>> getAllOwnedCourses(String email) {
         Response<List<CourseDto>> response = new Response<>();
 

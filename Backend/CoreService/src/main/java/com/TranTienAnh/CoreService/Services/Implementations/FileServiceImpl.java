@@ -25,7 +25,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String saveImage(MultipartFile file, Long userId, String directory) throws IOException {
+    public String saveImage(MultipartFile file, Long id, String directory) throws IOException {
 
         List<String> allowed = List.of("image/jpeg", "image/png", "image/webp");
         if (!allowed.contains(file.getContentType())) {
@@ -49,14 +49,53 @@ public class FileServiceImpl implements FileService {
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
                     String existingBaseName = getBaseName(path.getFileName().toString());
-                    if (existingBaseName.equals(userId.toString())) {
+                    if (existingBaseName.equals(id.toString())) {
                         Files.delete(path);
                     }
                 }
             }
         }
 
-        String fileName = userId + extension;
+        String fileName = id + extension;
+        Path filePath = uploadPath.resolve(fileName);
+
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return filePath.toString().replace("\\", "/");
+    }
+
+    @Override
+    public String saveVideo(MultipartFile file, Long id, String directory) throws IOException {
+        List<String> allowed = List.of("video/mp4", "video/webm");
+        if (!allowed.contains(file.getContentType())) {
+            throw new CustomBadRequestException("File is not image");
+        }
+
+        Path uploadPath = Paths.get(uploadDir, directory);
+
+        Files.createDirectories(uploadPath);
+
+        // Lấy extension
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // Xóa các avatar cũ của user (khác đuôi vẫn xóa)
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(uploadPath)) {
+            for (Path path : stream) {
+                if (Files.isRegularFile(path)) {
+                    String existingBaseName = getBaseName(path.getFileName().toString());
+                    if (existingBaseName.equals(id.toString())) {
+                        Files.delete(path);
+                    }
+                }
+            }
+        }
+
+        String fileName = id + extension;
         Path filePath = uploadPath.resolve(fileName);
 
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);

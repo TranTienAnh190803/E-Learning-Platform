@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.DTOs;
 
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

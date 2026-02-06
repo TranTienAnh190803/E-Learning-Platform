@@ -1,10 +1,12 @@
 package com.TranTienAnh.CoreService.Forms;
 
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CourseForm {
     private String title;
 
@@ -13,6 +15,10 @@ public class CourseForm {
     private List<String> results;
 
     private MultipartFile image;
+
+    private Boolean isPublic;
+
+    private String password;
 
     public String getTitle() {
         return title;
@@ -44,5 +50,21 @@ public class CourseForm {
 
     public void setImage(MultipartFile image) {
         this.image = image;
+    }
+
+    public Boolean getPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(Boolean aPublic) {
+        isPublic = aPublic;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

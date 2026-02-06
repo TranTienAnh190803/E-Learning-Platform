@@ -1,38 +1,28 @@
-package com.TranTienAnh.CoreService.Models.Entities;
+package com.TranTienAnh.CoreService.DTOs;
 
 import com.TranTienAnh.CoreService.Models.Enums.LessonType;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 
-@Entity
-public class Lesson {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class LessonDto {
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private LessonType lessonType;
+    private String lessonType;
 
-    @Column(length = 10000)
     private String content;
 
-    @Column(nullable = true)
     private String contentUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    public Lesson() {
+    public LessonDto() {
     }
 
-    public Lesson(String title, LessonType lessonType, String content, Course course) {
+    public LessonDto(Long id, String title, String lessonType, String content, String contentUrl) {
+        this.id = id;
         this.title = title;
         this.lessonType = lessonType;
         this.content = content;
-        this.course = course;
+        this.contentUrl = contentUrl;
     }
 
     public Long getId() {
@@ -51,11 +41,11 @@ public class Lesson {
         this.title = title;
     }
 
-    public LessonType getLessonType() {
+    public String getLessonType() {
         return lessonType;
     }
 
-    public void setLessonType(LessonType lessonType) {
+    public void setLessonType(String lessonType) {
         this.lessonType = lessonType;
     }
 
@@ -73,13 +63,5 @@ public class Lesson {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
     }
 }

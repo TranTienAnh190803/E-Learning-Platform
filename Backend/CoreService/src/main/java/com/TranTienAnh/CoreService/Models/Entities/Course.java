@@ -31,6 +31,11 @@ public class Course {
     @Column(nullable = true)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private Boolean isPublic;
+
+    private String password;
+
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     private User Instructor;
@@ -41,12 +46,13 @@ public class Course {
     public Course() {
     }
 
-    public Course(String title, String description, CourseStatus status, List<String> results, String imageUrl, User instructor) {
+    public Course(String title, String description, CourseStatus status, List<String> results, Boolean isPublic, String password, User instructor) {
         this.title = title;
         this.description = description;
         this.status = status;
         this.results = results;
-        this.imageUrl = imageUrl;
+        this.isPublic = isPublic;
+        this.password = password;
         Instructor = instructor;
     }
 
@@ -104,5 +110,29 @@ public class Course {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(Boolean aPublic) {
+        isPublic = aPublic;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List<Lesson> getLesson() {
+        return lesson;
+    }
+
+    public void setLesson(List<Lesson> lesson) {
+        this.lesson = lesson;
     }
 }
