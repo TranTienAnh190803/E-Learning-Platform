@@ -25,14 +25,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String saveAvatar(MultipartFile file, Long userId) throws IOException {
+    public String saveImage(MultipartFile file, Long userId, String directory) throws IOException {
 
         List<String> allowed = List.of("image/jpeg", "image/png", "image/webp");
         if (!allowed.contains(file.getContentType())) {
-            throw new CustomBadRequestException("File không phải ảnh");
+            throw new CustomBadRequestException("File is not image");
         }
 
-        Path uploadPath = Paths.get(uploadDir, "avatar");
+        Path uploadPath = Paths.get(uploadDir, directory);
 
         Files.createDirectories(uploadPath);
 

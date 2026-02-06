@@ -620,7 +620,7 @@ public class UserServiceImpl implements UserService {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
-        String path = fileService.saveAvatar(file, user.getId());
+        String path = fileService.saveImage(file, user.getId(), "avatar");
 
         user.setAvatarPath(path);
         userRepository.save(user);

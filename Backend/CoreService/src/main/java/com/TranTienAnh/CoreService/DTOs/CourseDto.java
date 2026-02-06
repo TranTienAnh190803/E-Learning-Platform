@@ -1,53 +1,39 @@
-package com.TranTienAnh.CoreService.Models.Entities;
+package com.TranTienAnh.CoreService.DTOs;
 
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.util.List;
 
-@Entity
-public class Course {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CourseDto {
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private CourseStatus status;
+    private String status;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "course_result",
-            joinColumns = @JoinColumn(name = "course_id")
-    )
-    @Column(name = "result")
     private List<String> results;
 
-    @Column(nullable = true)
     private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "instructor_id")
-    private User Instructor;
+    private String instructor;
 
-    @OneToMany(mappedBy = "course")
-    private List<Lesson> lesson;
-
-    public Course() {
+    public CourseDto() {
     }
 
-    public Course(String title, String description, CourseStatus status, List<String> results, String imageUrl, User instructor) {
+    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.results = results;
         this.imageUrl = imageUrl;
-        Instructor = instructor;
+        this.instructor = instructor;
     }
 
     public Long getId() {
@@ -74,19 +60,11 @@ public class Course {
         this.description = description;
     }
 
-    public User getInstructor() {
-        return Instructor;
-    }
-
-    public void setInstructor(User instructor) {
-        Instructor = instructor;
-    }
-
-    public CourseStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(CourseStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -104,5 +82,13 @@ public class Course {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(String instructor) {
+        this.instructor = instructor;
     }
 }
