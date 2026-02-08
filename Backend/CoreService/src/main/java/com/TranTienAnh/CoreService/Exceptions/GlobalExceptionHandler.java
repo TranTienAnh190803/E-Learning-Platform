@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomNotFoundException.class)
-    public ResponseEntity<Response<Void>> handleNotFound(CustomBadRequestException ex) {
+    public ResponseEntity<Response<Void>> handleNotFound(CustomNotFoundException ex) {
         Response<Void> response = new Response<>();
         response.setSuccess(false);
         response.setStatusCode(404);

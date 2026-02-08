@@ -1,5 +1,6 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
+import com.TranTienAnh.CoreService.DTOs.EnrollmentDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -38,7 +40,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found."));
 
         // Khóa học không công khai (nhập sai mật khẩu)
-        if (!course.getPublic() && passwordEncoder.matches(password, course.getPassword()))
+        if (!course.getPublic() && !passwordEncoder.matches(password, course.getPassword()))
             throw new CustomBadRequestException("Wrong enrollment password");
 
         Enrollment enrollment = new Enrollment(
@@ -49,6 +51,28 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         );
         enrollmentRepository.save(enrollment);
 
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Enrolled course successfully");
+
         return  response;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    public Response<List<EnrollmentDto>> getEnrolledCourse(String email) {
+        Response<List<EnrollmentDto>> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var enrolledCourses = enrollmentRepository.findAllByStudentId(user.getId())
+                .stream()
+                .map(e -> new EnrollmentDto(e.getCourse().getId(), e.getCourse().getTitle(), e.getCourse().getDescription(), e.getCourse().getStatus().name(), e.getCourse().getResults(), e.getCourse().getImageUrl(), e.getCourse().getInstructor().getFullName(), e.getEnrollAt(), e.getStatus()))
+                .toList();
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setData(enrolledCourses);
+
+        return response;
     }
 }

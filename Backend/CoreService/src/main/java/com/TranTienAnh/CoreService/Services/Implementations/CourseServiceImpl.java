@@ -2,6 +2,7 @@ package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
+import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
@@ -42,7 +43,7 @@ public class CourseServiceImpl implements CourseService {
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
 
         String password = null;
-        if (!courseForm.getPublic())
+        if (!courseForm.isPublic())
             password = passwordEncoder.encode(courseForm.getPassword());
 
         Course course = new Course(
@@ -50,7 +51,7 @@ public class CourseServiceImpl implements CourseService {
                 courseForm.getDescription(),
                 CourseStatus.New,
                 courseForm.getResults(),
-                courseForm.getPublic(),
+                courseForm.isPublic(),
                 password,
                 user
         );
@@ -58,7 +59,7 @@ public class CourseServiceImpl implements CourseService {
 
         String image = null;
         if (courseForm.getImage() != null) {
-            image = fileService.saveImage(courseForm.getImage(), user.getId(), "course");
+            image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
             newCourse.setImageUrl(image);
             courseRepository.save(newCourse);
         }
@@ -121,7 +122,7 @@ public class CourseServiceImpl implements CourseService {
             course.setImageUrl(image);
         }
 
-        if (courseForm.getPublic())
+        if (courseForm.isPublic())
             course.setPassword(null);
         else
             course.setPassword(passwordEncoder.encode(courseForm.getPassword()));
@@ -130,6 +131,7 @@ public class CourseServiceImpl implements CourseService {
         course.setDescription(courseForm.getDescription());
         course.setResults(courseForm.getResults());
         course.setStatus(CourseStatus.Update);
+        courseRepository.save(course);
 
         response.setSuccess(true);
         response.setStatusCode(200);

@@ -1,15 +1,15 @@
 package com.TranTienAnh.CoreService.Controllers;
 
+import com.TranTienAnh.CoreService.DTOs.EnrollmentDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Services.Interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("enrollment-api")
@@ -23,6 +23,15 @@ public class EnrollmentController {
         assert authentication != null;
         String email = authentication.getName();
         Response<Void> response = enrollmentService.enrollCourse(courseId, password, email);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("get-enrolled-courses")
+    public ResponseEntity<Response<List<EnrollmentDto>>> getEnrolledCourses() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<List<EnrollmentDto>> response = enrollmentService.getEnrolledCourse(email);
         return ResponseEntity.ok(response);
     }
 }

@@ -38,7 +38,7 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
-    private User Instructor;
+    private User instructor;
 
     @OneToMany(mappedBy = "course")
     private List<Lesson> lesson;
@@ -53,7 +53,7 @@ public class Course {
         this.results = results;
         this.isPublic = isPublic;
         this.password = password;
-        Instructor = instructor;
+        this.instructor = instructor;
     }
 
     public Long getId() {
@@ -81,11 +81,11 @@ public class Course {
     }
 
     public User getInstructor() {
-        return Instructor;
+        return instructor;
     }
 
     public void setInstructor(User instructor) {
-        Instructor = instructor;
+        this.instructor = instructor;
     }
 
     public CourseStatus getStatus() {

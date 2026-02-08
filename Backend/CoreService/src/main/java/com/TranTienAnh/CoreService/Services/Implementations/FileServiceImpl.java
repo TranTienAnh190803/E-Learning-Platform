@@ -66,10 +66,10 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String saveVideo(MultipartFile file, Long id, String directory) throws IOException {
-        List<String> allowed = List.of("video/mp4", "video/webm");
-        if (!allowed.contains(file.getContentType())) {
-            throw new CustomBadRequestException("File is not image");
-        }
+//        List<String> allowed = List.of("video/mp4", "video/webm", "video/wmv");
+//        if (!allowed.contains(file.getContentType())) {
+//            throw new CustomBadRequestException("File is not video");
+//        }
 
         Path uploadPath = Paths.get(uploadDir, directory);
 

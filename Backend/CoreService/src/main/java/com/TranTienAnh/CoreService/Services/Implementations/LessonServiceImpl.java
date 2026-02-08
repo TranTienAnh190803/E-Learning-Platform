@@ -2,11 +2,15 @@ package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
+import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
+import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
+import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.LessonRepository;
+import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import com.TranTienAnh.CoreService.Services.Interfaces.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,12 @@ public class LessonServiceImpl implements LessonService {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
     private FileService fileService;
@@ -63,6 +73,16 @@ public class LessonServiceImpl implements LessonService {
     public Response<List<LessonDto>> getAll(Long courseId, String email) {
         Response<List<LessonDto>> response = new Response<>();
 
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+        if (user.getRole() == Role.INSTRUCTOR && !course.getInstructor().getEmail().equals(email)) {
+            throw new CustomBadRequestException("This course is not belong to you.");
+        }
+        var check = enrollmentRepository.existsByStudentIdAndCourseId(user.getId(), course.getId());
+        if (user.getRole() == Role.STUDENT && !check) {
+            throw new CustomBadRequestException("You haven't enrolled this course lesson yet.");
+        }
+
         var lessonList = lessonRepository.findAllByCourseId(courseId)
                 .stream()
                 .map((l) -> new LessonDto(l.getId(), l.getTitle(), l.getLessonType().name(), l.getContent(), l.getContentUrl()))
@@ -80,7 +100,18 @@ public class LessonServiceImpl implements LessonService {
     public Response<LessonDto> getLesson(Long lessonId, String email) {
         Response<LessonDto> response = new Response<>();
 
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson not found."));
+        var course = courseRepository.findById(lesson.getCourse().getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        if (user.getRole() == Role.INSTRUCTOR && !course.getInstructor().getEmail().equals(email)) {
+            throw new CustomBadRequestException("This course is not belong to you.");
+        }
+        var check = enrollmentRepository.existsByStudentIdAndCourseId(user.getId(), course.getId());
+        if (user.getRole() == Role.STUDENT && !check) {
+            throw new CustomBadRequestException("You haven't enrolled this course lesson yet.");
+        }
+
         LessonDto dto = new LessonDto(
                 lesson.getId(),
                 lesson.getTitle(),
@@ -101,7 +132,12 @@ public class LessonServiceImpl implements LessonService {
     public Response<Void> updateLesson(Long lessonId, LessonForm lessonForm, String email) throws IOException {
         Response<Void> response = new Response<>();
 
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson not found."));
+        if (!lesson.getCourse().getInstructor().equals(user)) {
+            throw new CustomBadRequestException("This course is not belong to you.");
+        }
+
 
         if (lessonForm.getVideoFile() != null) {
             String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
@@ -123,7 +159,12 @@ public class LessonServiceImpl implements LessonService {
     public Response<Void> deleteLesson(Long lessonId, String email) {
         Response<Void> response = new Response<>();
 
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson not found."));
+        if (!lesson.getCourse().getInstructor().equals(user)) {
+            throw new CustomBadRequestException("This course is not belong to you.");
+        }
+
         lessonRepository.delete(lesson);
 
         response.setSuccess(true);

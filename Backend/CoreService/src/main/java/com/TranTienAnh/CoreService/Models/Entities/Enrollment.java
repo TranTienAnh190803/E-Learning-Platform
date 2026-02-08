@@ -35,6 +35,8 @@ public class Enrollment {
         this.course = course;
         this.enrollAt = enrollAt;
         this.status = status;
+
+        this.id = new EnrollmentId(student.getId(), course.getId());
     }
 
     public EnrollmentId getId() {
