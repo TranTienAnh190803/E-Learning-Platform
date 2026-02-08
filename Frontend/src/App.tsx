@@ -8,6 +8,7 @@ import RegistrationPage from "./Pages/RegistrationPage";
 import PasswordRecoveryPage from "./Pages/PasswordRecoveryPage";
 import { isInstructor, isStudent } from "./Helper/CheckRole";
 import AccountPage from "./Pages/AccountPage";
+import { socket } from "./Services/RealTimeService/SocketIOConnection";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -16,6 +17,14 @@ function App() {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <>
