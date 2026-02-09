@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { socketEventHandler } from "../Socket/SocketEvent.js";
+import { socketMiddleware } from "../Middlewares/SocketMiddleware.js";
 
 const clientUrl = process.env.FRONTEND_URL;
 
@@ -16,8 +17,9 @@ export const initSocketIO = async (httpServer) => {
   });
 
   // 2. Socket Middleware
+  io.use(socketMiddleware);
 
-  // 3. Handle Event
+  // 3. Handle Event (connection + event logic)
   socketEventHandler(io);
 
   return io;
