@@ -36,10 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailService.loadUserByUsername(email);
 
+                // Gửi dữ liệu xuống controller bằng security context
                 if (jwtUtil.isTokenValid(jwtToken, userDetails)) {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
+                            userDetails, jwtToken, userDetails.getAuthorities()
                     );
                     token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     securityContext.setAuthentication(token);

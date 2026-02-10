@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+const notificationType = ["NEW_LESSON", "NEW_STUDENT", "DELETE_COURSE"];
+
 const NotificationSchema = new mongoose.Schema({
   userId: {
     type: Number,
@@ -7,8 +9,12 @@ const NotificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["NEW_LESSON", "NEW_STUDENT", "DELETE_COURSE"],
+    enum: notificationType,
     required: true,
+    set: (value) => {
+      if (typeof value === "number") return notificationType[value];
+      return value;
+    },
   },
   title: {
     type: String,
@@ -28,7 +34,7 @@ const NotificationSchema = new mongoose.Schema({
   },
   readAt: {
     type: Date,
-    required: true,
+    required: false,
   },
 });
 

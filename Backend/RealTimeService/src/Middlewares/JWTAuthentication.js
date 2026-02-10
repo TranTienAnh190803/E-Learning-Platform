@@ -24,9 +24,9 @@ export const authentication = (req, res, next) => {
         }
 
         req.user = payload;
-      });
 
-      return next();
+        return next();
+      });
     }
 
     return res.status(401).json({

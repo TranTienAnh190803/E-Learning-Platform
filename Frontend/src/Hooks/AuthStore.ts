@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { AuthState } from "../Types/Common.type";
 import type { LoginForm } from "../Types/User.type";
 import { getProfile, login } from "../Services/CoreService/UserApi.ts";
+import { socketConnect, socketDisconnect } from "../Services/RealTimeService/Socket.ts";
 
 interface AuthStore {
     auth: AuthState,
@@ -32,6 +33,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const profile = await getProfile();
             if (profile.success && profile.data) {
                 set({auth: {status: "authenticated", user: profile.data}})
+
+                // CONNECT SOCKET
+                socketConnect(response.data.token);
             }
             else {
                 localStorage.removeItem("token");
@@ -47,6 +51,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     logout: () => {
         localStorage.removeItem("token");
+        socketDisconnect(); // DISCONNECT SOCKET
         set({auth: {status: "guest"}});
         window.location.href = "/login";
     },
@@ -63,6 +68,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const profile = await getProfile();
             if (profile.success && profile.data) {
                 set({auth: {status: "authenticated", user: profile.data}});
+
+                // RECONNECT SOCKET if web reload
+                socketConnect(token);
             } else {
                 localStorage.removeItem("token");
                 set({auth: {status: "guest"}});

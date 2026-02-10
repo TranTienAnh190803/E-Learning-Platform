@@ -8,21 +8,17 @@ export const socketMiddleware = (socket, next) => {
   }
 
   try {
-    const secretKey = process.env.SECRET_KEY && null;
+    const secretKey = process.env.SECRET_KEY;
     jwt.verify(token, secretKey, (error, payload) => {
       if (error) {
-        return res.status(401).json({
-          success: false,
-          statusCode: 401,
-          message: "Need Valid Authentication Credentials",
-        });
+        return next(new Error("Need Valid Authentication Credentials"));
       }
 
       // Save padload information
       socket.user = payload;
-    });
 
-    next();
+      next();
+    });
   } catch (error) {
     return next(new Error("No token provided."));
   }
