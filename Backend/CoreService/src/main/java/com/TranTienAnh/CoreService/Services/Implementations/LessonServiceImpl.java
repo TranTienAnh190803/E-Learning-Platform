@@ -75,7 +75,7 @@ public class LessonServiceImpl implements LessonService {
                 0,
                 "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has added more lessons.",
                 "",
-                newLesson.getId().toString(),
+                courseId.toString() + "/" + newLesson.getId().toString(),
                 allStudent
         );
         var notificationResponse = realtimeService.pushNotification(token, notificationForm);

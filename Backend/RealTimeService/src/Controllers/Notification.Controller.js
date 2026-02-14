@@ -27,11 +27,11 @@ export const getAllNotification = async (req, res) => {
 };
 
 export const pushNotification = async (req, res) => {
-  const { type, title, content, contentId, userList } = req.body;
+  const { type, title, content, contentId, receivers } = req.body;
 
   try {
     let notification = {
-      userId: userList,
+      userId: receivers,
       type: type,
       title: title,
       content: content,
@@ -77,6 +77,7 @@ export const pushNotification = async (req, res) => {
       message: "Push notification successfully",
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       statusCode: 500,
       success: false,

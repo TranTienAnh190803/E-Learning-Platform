@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class RealtimeService {
-    @Value("realtime.service.url")
+    @Value("${realtime.url}")
     private String realtimeUrl;
 
     @Autowired

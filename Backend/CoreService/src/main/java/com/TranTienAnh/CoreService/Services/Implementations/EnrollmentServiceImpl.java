@@ -62,7 +62,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 1,
                 "Student " + user.getFullName() + " has enrolled course " + course.getTitle(),
                 "",
-                courseId + "/student-list",
+                "/student-list",
                 instructorId
         );
         var notificationResponse = realtimeService.pushNotification(token, notificationForm);

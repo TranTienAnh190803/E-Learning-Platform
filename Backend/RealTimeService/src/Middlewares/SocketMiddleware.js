@@ -16,6 +16,7 @@ export const socketMiddleware = (socket, next) => {
 
       // Save padload information
       socket.user = payload;
+      socket.token = token;
 
       next();
     });
