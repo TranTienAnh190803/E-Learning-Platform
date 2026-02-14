@@ -6,7 +6,9 @@ import com.TranTienAnh.CoreService.DTOs.Response;
 import java.util.List;
 
 public interface EnrollmentService {
-    Response<Void> enrollCourse(Long courseId, String password, String email);
+    Response<Void> enrollCourse(Long courseId, String password, String email, String token);
 
     Response<List<EnrollmentDto>> getEnrolledCourse(String email);
+
+    Response<List<?>> getCourseForSocket(String email);
 }

@@ -15,6 +15,17 @@ public class Response<T> {
 
     private T data;
 
+    // Constructor
+    public Response() {
+    }
+
+    public Response(boolean success, int statusCode, String message, T data) {
+        this.success = success;
+        this.statusCode = statusCode;
+        this.message = message;
+        this.data = data;
+    }
+
     // Getter & Setter
     public boolean isSuccess() {
         return success;

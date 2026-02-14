@@ -1,10 +1,12 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
+import com.TranTienAnh.CoreService.API.RealtimeService;
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
+import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
@@ -38,10 +40,13 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private RealtimeService realtimeService;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
-    public Response<Void> addLesson(Long courseId, LessonForm lessonForm) throws IOException {
+    public Response<Void> addLesson(Long courseId, LessonForm lessonForm, String token) throws IOException {
         Response<Void> response = new Response<>();
 
         var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found"));
@@ -60,6 +65,22 @@ public class LessonServiceImpl implements LessonService {
             newLesson.setContentUrl(videoUrl);
             lessonRepository.save(newLesson);
         }
+
+        // Push Notification to All Student (Call API pushNotification from RealtimeService)
+        var allStudent = enrollmentRepository.findAllByCourseId(courseId)
+                .stream()
+                .map(e -> e.getStudent().getId())
+                .toList();
+        NotificationForm notificationForm = new NotificationForm(
+                0,
+                "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has added more lessons.",
+                "",
+                newLesson.getId().toString(),
+                allStudent
+        );
+        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+        if (!notificationResponse.isSuccess())
+            throw new CustomBadRequestException(notificationResponse.getMessage());
 
         response.setSuccess(true);
         response.setStatusCode(200);

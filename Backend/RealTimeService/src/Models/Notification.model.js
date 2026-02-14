@@ -4,7 +4,7 @@ const notificationType = ["NEW_LESSON", "NEW_STUDENT", "DELETE_COURSE"];
 
 const NotificationSchema = new mongoose.Schema({
   userId: {
-    type: Number,
+    type: [Number],
     required: true,
   },
   type: {

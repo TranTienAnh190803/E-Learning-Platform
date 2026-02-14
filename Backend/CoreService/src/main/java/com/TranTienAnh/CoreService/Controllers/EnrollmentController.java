@@ -22,7 +22,8 @@ public class EnrollmentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();
-        Response<Void> response = enrollmentService.enrollCourse(courseId, password, email);
+        String token = (String) authentication.getDetails();
+        Response<Void> response = enrollmentService.enrollCourse(courseId, password, email, token);
         return ResponseEntity.ok(response);
     }
 
@@ -32,6 +33,15 @@ public class EnrollmentController {
         assert authentication != null;
         String email = authentication.getName();
         Response<List<EnrollmentDto>> response = enrollmentService.getEnrolledCourse(email);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("get-courses-for-socket")
+    public ResponseEntity<Response<List<?>>> getCoursesForSocket() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<List<?>> response = enrollmentService.getCourseForSocket(email);
         return ResponseEntity.ok(response);
     }
 }

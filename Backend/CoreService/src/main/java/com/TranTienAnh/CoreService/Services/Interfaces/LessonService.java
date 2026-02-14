@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface LessonService {
-    Response<Void> addLesson(Long courseId, LessonForm lessonForm) throws IOException;
+    Response<Void> addLesson(Long courseId, LessonForm lessonForm, String token) throws IOException;
 
     Response<List<LessonDto>> getAll(Long courseId, String email);
 

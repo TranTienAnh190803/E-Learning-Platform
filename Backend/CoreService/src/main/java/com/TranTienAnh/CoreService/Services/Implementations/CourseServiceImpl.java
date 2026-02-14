@@ -1,13 +1,16 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
+import com.TranTienAnh.CoreService.API.RealtimeService;
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
+import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
+import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
@@ -33,6 +36,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private RealtimeService realtimeService;
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
@@ -142,12 +151,29 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
-    public Response<Void> deleteCourse(String email, Long courseId) {
+    @Transactional
+    public Response<Void> deleteCourse(String email, Long courseId, String token) {
         Response<Void> response = new Response<>();
 
         var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
         courseRepository.delete(course);
+
+        // Push Notification (Call API pushNotification - pushNotification is main job)
+        var allStudent = enrollmentRepository.findAllByCourseId(courseId)
+                .stream()
+                .map(e -> e.getStudent().getId())
+                .toList();
+        NotificationForm notificationForm = new NotificationForm(
+                2,
+                "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has been deleted.",
+                "",
+                null,
+                allStudent
+        );
+        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+        if (!notificationResponse.isSuccess())
+            throw new CustomBadRequestException(notificationResponse.getMessage());
 
         response.setSuccess(true);
         response.setStatusCode(200);

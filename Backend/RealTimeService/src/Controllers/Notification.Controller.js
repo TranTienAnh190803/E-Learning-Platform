@@ -1,7 +1,7 @@
 import { Notification } from "../Models/Notification.Model.js";
 
 export const getAllNotification = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
 
   try {
     const notification = await Notification.find({ userId: userId }).lean();
@@ -27,11 +27,11 @@ export const getAllNotification = async (req, res) => {
 };
 
 export const pushNotification = async (req, res) => {
-  const { userId, type, title, content, contentId } = req.body;
+  const { type, title, content, contentId, userList } = req.body;
 
   try {
-    const notification = {
-      userId: userId,
+    let notification = {
+      userId: userList,
       type: type,
       title: title,
       content: content,
@@ -40,7 +40,7 @@ export const pushNotification = async (req, res) => {
     };
 
     if (type === 0) {
-      // New lesson
+      // New lesson (contentId = lessonId)
       notification = {
         ...notification,
         contentUrl: contentId,
@@ -48,7 +48,7 @@ export const pushNotification = async (req, res) => {
 
       await Notification.create(notification);
     } else if (type === 1) {
-      // New student
+      // New student (contentId = 'course's student list')
       notification = {
         ...notification,
         contentUrl: contentId,
@@ -56,7 +56,7 @@ export const pushNotification = async (req, res) => {
 
       await Notification.create(notification);
     } else if (type === 2) {
-      // Delete course
+      // Delete course (contentId = null)
       notification = {
         ...notification,
         contentUrl: contentId,

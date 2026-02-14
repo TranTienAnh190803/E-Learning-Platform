@@ -21,7 +21,10 @@ public class LessonController {
 
     @PostMapping("add-lesson/{courseId}")
     public ResponseEntity<Response<Void>> addLesson(@PathVariable("courseId") Long courseId, @ModelAttribute LessonForm lessonForm) throws IOException {
-        Response<Void> response = lessonService.addLesson(courseId, lessonForm);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String token = (String) authentication.getDetails();
+        Response<Void> response = lessonService.addLesson(courseId, lessonForm, token);
         return ResponseEntity.ok(response);
     }
 

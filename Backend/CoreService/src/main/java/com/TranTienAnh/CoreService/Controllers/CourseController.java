@@ -55,7 +55,8 @@ public class CourseController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();
-        Response<Void> response = courseService.deleteCourse(email, courseId);
+        String token = (String) authentication.getDetails();
+        Response<Void> response = courseService.deleteCourse(email, courseId, token);
         return ResponseEntity.ok(response);
     }
 
