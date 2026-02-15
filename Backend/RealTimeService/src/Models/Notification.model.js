@@ -28,6 +28,11 @@ const NotificationSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  sendAt: {
+    type: Date,
+    default: Date.now,
+    required: false,
+  },
   isRead: {
     type: Boolean,
     required: true,

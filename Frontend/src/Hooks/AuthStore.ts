@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { AuthState } from "../Types/Common.type";
 import type { LoginForm } from "../Types/User.type";
 import { getProfile, login } from "../Services/CoreService/UserApi.ts";
-import { socketConnect, socketDisconnect } from "../Services/RealTimeService/Socket.ts";
+import { socketConnect, socketDisconnect } from "../Configurations/Socket.ts";
 
 interface AuthStore {
     auth: AuthState,

@@ -4,7 +4,9 @@ export const getAllNotification = async (req, res) => {
   const userId = req.user.userId;
 
   try {
-    const notification = await Notification.find({ userId: userId }).lean();
+    const notification = await Notification.find({ userId: userId })
+      .select("-userId -__v")
+      .lean();
     if (notification.length > 0)
       return res.status(200).json({
         success: true,
@@ -81,6 +83,63 @@ export const pushNotification = async (req, res) => {
     return res.status(500).json({
       statusCode: 500,
       success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const readNotification = async (req, res) => {
+  const { notificationId } = req.params;
+
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      notificationId,
+      {
+        isRead: true,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (notification)
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+      });
+
+    return res.status(404).json({
+      success: false,
+      statusCode: 404,
+      message: "Notification not found.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+};
+
+export const readAllNotification = async (req, res) => {
+  const userId = req.user.userId;
+
+  try {
+    await Notification.updateMany(
+      { userId: userId },
+      { $set: { isRead: true } },
+    );
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
       message: error.message,
     });
   }

@@ -5,14 +5,27 @@ import { IoExit } from "react-icons/io5";
 import { FaAngleDown, FaAt, FaBell, FaBook, FaUser } from "react-icons/fa";
 import { LuMessageCircleMore } from "react-icons/lu";
 import { useEffect, useState } from "react";
+import type { NotificationData } from "../Types/Notification.type";
+import {
+  getAllNotification,
+  readAllNotification,
+  readNotification,
+} from "../Services/RealTimeService/NotificationApi";
 
 export default function Navbar() {
+  // Global State
   const auth = useAuthStore((s) => s.auth);
   const logout = useAuthStore((s) => s.logout);
-  const [openMenu, setOpenMenu] = useState<boolean>(false);
 
+  // Local State
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
+  const [openNotification, setOpenNotification] = useState<boolean>(false);
+  const [notification, setNotification] = useState<NotificationData[]>([]);
+
+  // Side Event
   const handleDocClick = () => {
     setOpenMenu(false);
+    setOpenNotification(false);
   };
 
   useEffect(() => {
@@ -22,6 +35,28 @@ export default function Navbar() {
       document.removeEventListener("click", handleDocClick);
     };
   }, []);
+
+  // API
+  const fetchAllNotification = async () => {
+    const response = await getAllNotification();
+    if (response.success) setNotification(response.data!);
+    else alert(response.message);
+  };
+
+  useEffect(() => {
+    if (auth.status === "authenticated") fetchAllNotification();
+  }, [auth.status]);
+
+  const handleReadMessage = async (notificationId: string) => {
+    const response = await readNotification(notificationId);
+    if (!response.success) alert(response.message);
+  };
+
+  const handleReadAll = async () => {
+    const response = await readAllNotification();
+    if (response.success) fetchAllNotification();
+    else alert(response.message);
+  };
 
   return (
     <div className="h-25 px-25 fixed top-0 left-0 right-0 flex justify-between items-center bg-black shadow-xl/20 z-1000">
@@ -63,8 +98,52 @@ export default function Navbar() {
       {/* Instructor & Student Navbar */}
       {auth.status === "authenticated" && !isAdmin(auth.user.role) && (
         <div className="flex justify-between items-center text-white">
-          <div className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer">
-            <FaBell />
+          <div className="relative">
+            <div
+              className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenNotification((prev) => !prev);
+              }}
+            >
+              <FaBell />
+            </div>
+            {notification.some((value) => !value.isRead) && (
+              <div className="absolute top-2 right-6 w-[10px] aspect-square bg-red-500 rounded-full"></div>
+            )}
+            {openNotification && (
+              <div
+                className="absolute right-0 top-15 min-w-[450px] min-h-[70vh] bg-white text-black rounded-2xl overflow-y-scroll scrollbar-hide shadow-xl/15"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="py-3 px-5 flex justify-between items-center border-b border-gray-200">
+                  <p className="font-bold text-3xl">Notification</p>
+                  <p
+                    className="text-blue-500 text-sm hover:underline cursor-pointer"
+                    onClick={() => {
+                      handleReadAll();
+                    }}
+                  >
+                    Mark as readed
+                  </p>
+                </div>
+                {notification.map((value) => {
+                  return (
+                    <div
+                      className={`p-5 cursor-pointer hover:bg-gray-100 ${!value.isRead && "bg-blue-50"}`}
+                      onClick={() => {
+                        handleReadMessage(value._id);
+                      }}
+                      key={value._id}
+                    >
+                      <p className="text-lg font-bold">{value.title}</p>
+                      <p className="text-sm">{value.content}</p>
+                      <div className="text-end"></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer">
             <LuMessageCircleMore />
