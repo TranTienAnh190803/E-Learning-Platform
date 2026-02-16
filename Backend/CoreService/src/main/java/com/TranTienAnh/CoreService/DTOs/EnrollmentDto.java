@@ -11,8 +11,8 @@ public class EnrollmentDto extends CourseDto{
 
     private int completedStatus;
 
-    public EnrollmentDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, LocalDateTime enrollAt, int completedStatus) {
-        super(id, title, description, status, results, imageUrl, instructor);
+    public EnrollmentDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublic, LocalDateTime enrollAt, int completedStatus) {
+        super(id, title, description, status, results, imageUrl, instructor, isPublic);
         this.enrollAt = enrollAt;
         this.completedStatus = completedStatus;
     }

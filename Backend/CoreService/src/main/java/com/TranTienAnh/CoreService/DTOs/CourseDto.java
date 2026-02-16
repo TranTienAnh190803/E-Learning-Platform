@@ -24,10 +24,12 @@ public class CourseDto {
 
     private String instructor;
 
+    private Boolean isPublic;
+
     public CourseDto() {
     }
 
-    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor) {
+    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublic) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -35,6 +37,7 @@ public class CourseDto {
         this.results = results;
         this.imageUrl = imageUrl;
         this.instructor = instructor;
+        this.isPublic = isPublic;
     }
 
     public Long getId() {
@@ -91,5 +94,13 @@ public class CourseDto {
 
     public void setInstructor(String instructor) {
         this.instructor = instructor;
+    }
+
+    public Boolean getPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(Boolean aPublic) {
+        isPublic = aPublic;
     }
 }

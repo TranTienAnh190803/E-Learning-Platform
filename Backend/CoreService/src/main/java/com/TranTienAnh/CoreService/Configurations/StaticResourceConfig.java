@@ -16,5 +16,11 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         // Cho phép truy cập đường dẫn upload/avatar (public đường dẫn)
         registry.addResourceHandler("/uploads/avatar/**")
                 .addResourceLocations("file:" + uploadDir + "/avatar/");
+
+        registry.addResourceHandler("/uploads/course/**")
+                .addResourceLocations("file:" + uploadDir + "/course/");
+
+        registry.addResourceHandler("/uploads/lesson/**")
+                .addResourceLocations("file:" + uploadDir + "/lesson/");
     }
 }

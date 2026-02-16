@@ -82,7 +82,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var enrolledCourses = enrollmentRepository.findAllByStudentId(user.getId())
                 .stream()
-                .map(e -> new EnrollmentDto(e.getCourse().getId(), e.getCourse().getTitle(), e.getCourse().getDescription(), e.getCourse().getStatus().name(), e.getCourse().getResults(), e.getCourse().getImageUrl(), e.getCourse().getInstructor().getFullName(), e.getEnrollAt(), e.getStatus()))
+                .map(e -> new EnrollmentDto(e.getCourse().getId(), e.getCourse().getTitle(), e.getCourse().getDescription(), e.getCourse().getStatus().name(), e.getCourse().getResults(), e.getCourse().getImageUrl(), e.getCourse().getInstructor().getFullName(), e.getCourse().getPublic(), e.getEnrollAt(), e.getStatus()))
                 .toList();
 
         response.setSuccess(true);

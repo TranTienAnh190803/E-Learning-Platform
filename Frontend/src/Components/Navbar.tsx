@@ -150,7 +150,7 @@ export default function Navbar() {
           </div>
           <div className="relative">
             <div
-              className="px-3 py-2 flex items-center rounded-4xl bg-gray-800 hover:bg-gray-900 hover:text-gray-300 cursor-pointer"
+              className="px-3 py-2 flex items-center rounded-4xl bg-gray-800 hover:bg-gray-900 hover:text-gray-300 cursor-pointer select-none"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpenMenu((prev) => !prev);

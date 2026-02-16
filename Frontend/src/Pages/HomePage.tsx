@@ -5,37 +5,29 @@ import Navbar from "../Components/Navbar";
 import { isAdmin } from "../Helper/CheckRole";
 import UserManagement from "../Components/UserManagement";
 import Footer from "../Components/Footer";
+import Slider from "../Components/Slider";
 
 export default function HomePage() {
   document.title = "E-Learning";
   // Global State
   const auth = useAuthStore((s) => s.auth);
-  const logout = useAuthStore((s) => s.logout);
 
   // Local State
-  const [user, setUser] = useState<User>();
-
-  useEffect(() => {
-    if (auth.status === "authenticated") {
-      setUser(auth.user);
-      console.log(user);
-    }
-  });
 
   return (
     <div>
-      {/* <button
-        onClick={() => {
-          logout();
-        }}
-      >
-        Logout
-      </button> */}
       <Navbar />
-      {/* Admin Home */}
       <div className="min-h-screen">
+        {/* Admin Home */}
         {auth.status === "authenticated" && isAdmin(auth.user.role) && (
           <UserManagement />
+        )}
+        {/* Unauthenticate, Student, Instructor Home */}
+        {(auth.status !== "authenticated" ||
+          (auth.status === "authenticated" && !isAdmin(auth.user.role))) && (
+          <div className="mt-25">
+            <Slider />
+          </div>
         )}
       </div>
       <Footer />

@@ -8,6 +8,7 @@ import RegistrationPage from "./Pages/RegistrationPage";
 import PasswordRecoveryPage from "./Pages/PasswordRecoveryPage";
 import { isInstructor, isStudent } from "./Helper/CheckRole";
 import AccountPage from "./Pages/AccountPage";
+import InstructorCoursePage from "./Pages/InstructorCoursePage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -30,6 +31,7 @@ function App() {
           {auth.status === "authenticated" && isInstructor(auth.user.role) && (
             <>
               <Route path="/account" element={<AccountPage />} />
+              <Route path="/my-course" element={<InstructorCoursePage />} />
             </>
           )}
 

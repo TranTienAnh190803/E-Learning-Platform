@@ -92,7 +92,8 @@ public class CourseServiceImpl implements CourseService {
                 course.getStatus().name(),
                 course.getResults(),
                 course.getImageUrl(),
-                course.getInstructor().getFullName()
+                course.getInstructor().getFullName(),
+                course.getPublic()
         );
 
         response.setSuccess(true);
@@ -108,7 +109,7 @@ public class CourseServiceImpl implements CourseService {
 
         var courseList = courseRepository.findAll()
                 .stream()
-                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName()))
+                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName(), c.getPublic()))
                 .toList();
 
         response.setSuccess(true);
@@ -190,7 +191,7 @@ public class CourseServiceImpl implements CourseService {
         var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var courses = courseRepository.findAllByInstructorId(instructor.getId())
                 .stream()
-                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName()))
+                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName(), c.getPublic()))
                 .toList();
 
         response.setSuccess(true);
