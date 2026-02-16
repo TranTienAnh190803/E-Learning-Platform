@@ -26,6 +26,8 @@ public class CourseDto {
 
     private Boolean isPublic;
 
+    private String instructorAvatar;
+
     public CourseDto() {
     }
 
@@ -38,6 +40,18 @@ public class CourseDto {
         this.imageUrl = imageUrl;
         this.instructor = instructor;
         this.isPublic = isPublic;
+    }
+
+    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublic, String instructorAvatar) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.results = results;
+        this.imageUrl = imageUrl;
+        this.instructor = instructor;
+        this.isPublic = isPublic;
+        this.instructorAvatar = instructorAvatar;
     }
 
     public Long getId() {
@@ -102,5 +116,13 @@ public class CourseDto {
 
     public void setPublic(Boolean aPublic) {
         isPublic = aPublic;
+    }
+
+    public String getInstructorAvatar() {
+        return instructorAvatar;
+    }
+
+    public void setInstructorAvatar(String instructorAvatar) {
+        this.instructorAvatar = instructorAvatar;
     }
 }

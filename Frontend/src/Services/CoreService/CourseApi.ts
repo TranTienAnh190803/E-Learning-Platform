@@ -6,3 +6,8 @@ export const getOwnedCourse = async (): Promise<ApiResponse<CourseData[]>> => {
     const response = await axios.get<ApiResponse<CourseData[]>>("/course-api/get-all-owned-courses");
     return response.data;
 }
+
+export const getAllCourse = async (): Promise<ApiResponse<CourseData[]>> => {
+    const response = await axios.get<ApiResponse<CourseData[]>>("/course-api/public/get-all");
+    return response.data;
+}

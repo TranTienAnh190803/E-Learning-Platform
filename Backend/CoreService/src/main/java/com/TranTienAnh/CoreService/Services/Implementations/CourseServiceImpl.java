@@ -109,7 +109,7 @@ public class CourseServiceImpl implements CourseService {
 
         var courseList = courseRepository.findAll()
                 .stream()
-                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName(), c.getPublic()))
+                .map((c) -> new CourseDto(c.getId(), c.getTitle(), c.getDescription(), c.getStatus().name(), c.getResults(), c.getImageUrl(), c.getInstructor().getFullName(), c.getPublic(), c.getInstructor().getAvatarPath()))
                 .toList();
 
         response.setSuccess(true);

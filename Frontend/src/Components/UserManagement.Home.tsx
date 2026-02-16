@@ -94,7 +94,7 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="handle-navbar bg-white">
+    <div className="handle-navbar bg-white min-h-screen">
       <div className="px-25 py-10 flex justify-between items-center gap-[10%] border-b-3 border-gray-200">
         <h1 className="text-5xl font-bold w-2/3">User Management</h1>
         <form className="input-box w-[50%]!" onSubmit={handleSearchUser}>

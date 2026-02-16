@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import { useAuthStore } from "../Hooks/AuthStore";
-import type { User } from "../Types/Common.type";
 import Navbar from "../Components/Navbar";
 import { isAdmin } from "../Helper/CheckRole";
-import UserManagement from "../Components/UserManagement";
+import UserManagement from "../Components/UserManagement.Home";
 import Footer from "../Components/Footer";
 import Slider from "../Components/Slider";
+import DefaultHome from "../Components/DefaultHome.Home";
 
 export default function HomePage() {
   document.title = "E-Learning";
@@ -27,6 +26,7 @@ export default function HomePage() {
           (auth.status === "authenticated" && !isAdmin(auth.user.role))) && (
           <div className="mt-25">
             <Slider />
+            <DefaultHome />
           </div>
         )}
       </div>

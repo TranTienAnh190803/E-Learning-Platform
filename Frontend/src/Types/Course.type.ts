@@ -8,5 +8,6 @@ export interface CourseData {
     results: string[],
     imageUrl: string,
     instructor: string,
+    instructorAvatar: string | null,
     public: boolean
 }
