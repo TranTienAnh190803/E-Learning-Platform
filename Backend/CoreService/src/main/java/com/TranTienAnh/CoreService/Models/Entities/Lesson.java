@@ -3,6 +3,8 @@ package com.TranTienAnh.CoreService.Models.Entities;
 import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 public class Lesson {
     @Id
@@ -21,6 +23,9 @@ public class Lesson {
     @Column(nullable = true)
     private String contentUrl;
 
+//    @Column(nullable = false)
+    private LocalDateTime addedDate;
+
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
@@ -28,11 +33,12 @@ public class Lesson {
     public Lesson() {
     }
 
-    public Lesson(String title, LessonType lessonType, String content, Course course) {
+    public Lesson(String title, LessonType lessonType, String content, Course course, LocalDateTime addedDate) {
         this.title = title;
         this.lessonType = lessonType;
         this.content = content;
         this.course = course;
+        this.addedDate = addedDate;
     }
 
     public Long getId() {
@@ -81,5 +87,13 @@ public class Lesson {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public LocalDateTime getAddedDate() {
+        return addedDate;
+    }
+
+    public void setAddedDate(LocalDateTime addedDate) {
+        this.addedDate = addedDate;
     }
 }

@@ -3,6 +3,8 @@ package com.TranTienAnh.CoreService.DTOs;
 import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import jakarta.persistence.Column;
 
+import java.time.LocalDateTime;
+
 public class LessonDto {
     private Long id;
 
@@ -14,15 +16,18 @@ public class LessonDto {
 
     private String contentUrl;
 
+    private LocalDateTime addedDate;
+
     public LessonDto() {
     }
 
-    public LessonDto(Long id, String title, String lessonType, String content, String contentUrl) {
+    public LessonDto(Long id, String title, String lessonType, String content, String contentUrl, LocalDateTime addedDate) {
         this.id = id;
         this.title = title;
         this.lessonType = lessonType;
         this.content = content;
         this.contentUrl = contentUrl;
+        this.addedDate = addedDate;
     }
 
     public Long getId() {
@@ -63,5 +68,13 @@ public class LessonDto {
 
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
+    }
+
+    public LocalDateTime getAddedDate() {
+        return addedDate;
+    }
+
+    public void setAddedDate(LocalDateTime addedDate) {
+        this.addedDate = addedDate;
     }
 }

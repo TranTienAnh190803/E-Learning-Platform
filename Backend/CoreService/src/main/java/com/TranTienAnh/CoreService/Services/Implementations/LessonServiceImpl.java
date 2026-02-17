@@ -2,6 +2,7 @@ package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.API.RealtimeService;
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
+import com.TranTienAnh.CoreService.DTOs.LessonListDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -54,7 +56,8 @@ public class LessonServiceImpl implements LessonService {
                 lessonForm.getTitle(),
                 lessonForm.getLessonType(),
                 lessonForm.getContent(),
-                course
+                course,
+                LocalDateTime.now()
         );
 
         var newLesson = lessonRepository.save(lesson);
@@ -90,23 +93,14 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
-    public Response<List<LessonDto>> getAll(Long courseId, String email) {
-        Response<List<LessonDto>> response = new Response<>();
+    public Response<List<LessonListDto>> getAll(Long courseId) {
+        Response<List<LessonListDto>> response = new Response<>();
 
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found."));
-        if (user.getRole() == Role.INSTRUCTOR && !course.getInstructor().getEmail().equals(email)) {
-            throw new CustomBadRequestException("This course is not belong to you.");
-        }
-        var check = enrollmentRepository.existsByStudentIdAndCourseId(user.getId(), course.getId());
-        if (user.getRole() == Role.STUDENT && !check) {
-            throw new CustomBadRequestException("You haven't enrolled this course lesson yet.");
-        }
 
         var lessonList = lessonRepository.findAllByCourseId(courseId)
                 .stream()
-                .map((l) -> new LessonDto(l.getId(), l.getTitle(), l.getLessonType().name(), l.getContent(), l.getContentUrl()))
+                .map((l) -> new LessonListDto(l.getId(), l.getTitle(), l.getAddedDate()))
                 .toList();
 
         response.setSuccess(true);
@@ -138,7 +132,8 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getTitle(),
                 lesson.getLessonType().name(),
                 lesson.getContent(),
-                lesson.getContentUrl()
+                lesson.getContentUrl(),
+                lesson.getAddedDate()
         );
 
         response.setSuccess(true);

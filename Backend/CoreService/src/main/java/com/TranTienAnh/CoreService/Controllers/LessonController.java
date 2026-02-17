@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Controllers;
 
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
+import com.TranTienAnh.CoreService.DTOs.LessonListDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Services.Interfaces.LessonService;
@@ -28,12 +29,9 @@ public class LessonController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("get-all/{courseId}")
-    public ResponseEntity<Response<List<LessonDto>>> getAll(@PathVariable("courseId") Long courseId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String email = authentication.getName();
-        Response<List<LessonDto>> response = lessonService.getAll(courseId, email);
+    @GetMapping("public/get-all/{courseId}")
+    public ResponseEntity<Response<List<LessonListDto>>> getAll(@PathVariable("courseId") Long courseId) {
+        Response<List<LessonListDto>> response = lessonService.getAll(courseId);
         return ResponseEntity.ok(response);
     }
 
