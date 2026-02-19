@@ -11,3 +11,23 @@ export const getAllCourse = async (): Promise<ApiResponse<CourseData[]>> => {
     const response = await axios.get<ApiResponse<CourseData[]>>("/course-api/public/get-all");
     return response.data;
 }
+
+export const getOneCourse = async (courseId: number): Promise<ApiResponse<CourseData>> => {
+    const response = await axios.get<ApiResponse<CourseData>>(`/course-api/public/get-course/${courseId}`);
+    return response.data;
+}
+
+export const addCourse = async (courseForm: FormData): Promise<ApiResponse<void>> => {
+    const response = await axios.post<ApiResponse<void>>("/course-api/add-course", courseForm);
+    return response.data;
+}
+
+export const updateCourse = async (courseId: number, courseForm: FormData): Promise<ApiResponse<void>> => {
+    const response = await axios.patch<ApiResponse<void>>(`/course-api/update-course/${courseId}`, courseForm);
+    return response.data;
+}
+
+export const deleteCourse = async (courseId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.delete(`/course-apidelete-course/${courseId}`);
+    return response.data;
+}

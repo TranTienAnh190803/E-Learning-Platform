@@ -9,6 +9,7 @@ import PasswordRecoveryPage from "./Pages/PasswordRecoveryPage";
 import { isInstructor, isStudent } from "./Helper/CheckRole";
 import AccountPage from "./Pages/AccountPage";
 import InstructorCoursePage from "./Pages/InstructorCoursePage";
+import CourseAddingPage from "./Pages/CourseAddingPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -32,6 +33,7 @@ function App() {
             <>
               <Route path="/account" element={<AccountPage />} />
               <Route path="/my-course" element={<InstructorCoursePage />} />
+              <Route path="/add-course" element={<CourseAddingPage />} />
             </>
           )}
 

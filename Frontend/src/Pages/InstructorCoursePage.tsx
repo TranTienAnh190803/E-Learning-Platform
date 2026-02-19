@@ -3,10 +3,14 @@ import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import { useEffect, useState } from "react";
 import type { CourseData } from "../Types/Course.type";
-import { getOwnedCourse } from "../Services/CoreService/CourseApi";
+import {
+  deleteCourse,
+  getOwnedCourse,
+} from "../Services/CoreService/CourseApi";
 import { useAuthStore } from "../Hooks/AuthStore";
 import { isInstructor } from "../Helper/CheckRole";
 import { FaCircle, FaSearch } from "react-icons/fa";
+import { IoIosMore } from "react-icons/io";
 
 const coreService = import.meta.env.VITE_CORE_SERVICE;
 
@@ -16,6 +20,13 @@ export default function InstructorCoursePage() {
 
   // Local State
   const [courses, setCourse] = useState<CourseData[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
+
+  useEffect(() => {
+    const handleDocClick = () => setOpenMenuId(null);
+    document.addEventListener("click", handleDocClick);
+    return () => document.removeEventListener("click", handleDocClick);
+  }, []);
 
   const fetchOwnedCourse = async () => {
     const response = await getOwnedCourse();
@@ -27,6 +38,14 @@ export default function InstructorCoursePage() {
     if (auth.status === "authenticated" && isInstructor(auth.user.role))
       fetchOwnedCourse();
   }, []);
+
+  const handleDeleteCourse = async (courseId: number) => {
+    if (confirm("Are you sure you want to DELETE this course?")) {
+      const response = await deleteCourse(courseId);
+      alert(response.message);
+      if (response.success) window.location.reload();
+    }
+  };
 
   return (
     <>
@@ -90,48 +109,45 @@ export default function InstructorCoursePage() {
                         }
                       </td>
                       <td className="px-4 py-2">{value.status}</td>
-                      {/* <td>
-                                  <div className="relative">
-                                    <div
-                                      className="hover:bg-gray-300 aspect-square w-10 rounded-full flex justify-center items-center"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuId((prev) =>
-                                          prev === value.id ? null : value.id,
-                                        );
-                                      }}
-                                      data-menu-button
-                                    >
-                                      <IoIosMore />
-                                    </div>
-            
-                                    {openMenuId === value.id && (
-                                      <div
-                                        className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded text-sm z-10 border-1 border-gray-300"
-                                        data-menu
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <button
-                                          className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                                          onClick={() =>
-                                            handleControlAccount(
-                                              value.id,
-                                              value.statusNumber,
-                                            )
-                                          }
-                                        >
-                                          {value.statusNumber === 0 ? "Disable" : "Enable"}
-                                        </button>
-                                        <button
-                                          className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
-                                          onClick={() => handleDeleteAccount(value.id)}
-                                        >
-                                          Delete
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </td> */}
+                      <td>
+                        <div className="relative">
+                          <div
+                            className="hover:bg-gray-300 aspect-square w-10 rounded-full flex justify-center items-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId((prev) =>
+                                prev === value.id ? null : value.id,
+                              );
+                            }}
+                            data-menu-button
+                          >
+                            <IoIosMore />
+                          </div>
+
+                          {openMenuId === value.id && (
+                            <div
+                              className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded text-sm z-10 border-1 border-gray-300"
+                              data-menu
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                                Details
+                              </button>
+                              <button className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                                Update
+                              </button>
+                              <button
+                                className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  handleDeleteCourse(value.id);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
