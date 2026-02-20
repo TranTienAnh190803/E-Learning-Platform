@@ -5,12 +5,15 @@ import com.TranTienAnh.CoreService.DTOs.CourseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
+import com.TranTienAnh.CoreService.Forms.CourseCreateForm;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
+import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
+import com.TranTienAnh.CoreService.Repositories.LessonRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -43,16 +47,20 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private RealtimeService realtimeService;
 
+    @Autowired
+    private LessonRepository lessonRepository;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
-    public Response<Void> addCourse(String email, CourseForm courseForm) throws IOException {
+    public Response<Void> addCourse(String email, CourseCreateForm courseForm) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
 
+        // Create Course
         String password = null;
-        if (!courseForm.isPublic())
+        if (!courseForm.isPublicCourse())
             password = passwordEncoder.encode(courseForm.getPassword());
 
         Course course = new Course(
@@ -60,7 +68,7 @@ public class CourseServiceImpl implements CourseService {
                 courseForm.getDescription(),
                 CourseStatus.New,
                 courseForm.getResults(),
-                courseForm.isPublic(),
+                courseForm.isPublicCourse(),
                 password,
                 user
         );
@@ -71,6 +79,24 @@ public class CourseServiceImpl implements CourseService {
             image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
             newCourse.setImageUrl(image);
             courseRepository.save(newCourse);
+        }
+
+        // Create First Lesson
+        Lesson lesson = new Lesson(
+                courseForm.getLessonTitle(),
+                courseForm.getLessonType(),
+                courseForm.getContent(),
+                newCourse,
+                LocalDateTime.now()
+        );
+
+        var newLesson = lessonRepository.save(lesson);
+
+        String videoUrl = null;
+        if (courseForm.getVideoFile() != null) {
+            videoUrl = fileService.saveVideo(courseForm.getVideoFile(), newLesson.getId(), "lesson");
+            newLesson.setContentUrl(videoUrl);
+            lessonRepository.save(newLesson);
         }
 
         response.setSuccess(true);

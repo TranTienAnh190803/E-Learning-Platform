@@ -2,6 +2,7 @@ package com.TranTienAnh.CoreService.Controllers;
 
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
+import com.TranTienAnh.CoreService.Forms.CourseCreateForm;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
 import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping(value = "add-course", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response<Void>> addCourse(@ModelAttribute CourseForm courseForm) throws IOException {
+    public ResponseEntity<Response<Void>> addCourse(@ModelAttribute CourseCreateForm courseForm) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();

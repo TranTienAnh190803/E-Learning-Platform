@@ -72,3 +72,10 @@ select {
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE và Edge */
 }
+
+/* Xóa nút tăng giảm của input number */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

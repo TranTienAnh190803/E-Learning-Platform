@@ -8,12 +8,12 @@ const coreService = import.meta.env.VITE_CORE_SERVICE;
 
 export default function Card({ course }: props) {
   return (
-    <div className="w-1/3 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110">
+    <div className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110">
       <img
         src={
           course.imageUrl
             ? `${coreService}/${course.imageUrl}`
-            : "asset/DefaultCourse.jpg"
+            : "assets/DefaultCourse.jpg"
         }
       />
       <div className="p-5 bg-white">
