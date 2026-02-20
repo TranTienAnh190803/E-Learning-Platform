@@ -6,11 +6,11 @@ export default function BasicPhase() {
   const context = useContext(CourseAddingContext);
 
   if (!context) {
-    throw new Error("Roadmap must be used within Context");
+    throw new Error("Must be used within Context");
   }
 
   // Context
-  const { courseForm, setCourseForm, setPhase } = context;
+  const { courseForm, setCourseForm, handleNextButton } = context;
 
   // State
   const [resultCount, setResultCount] = useState<number>(
@@ -34,9 +34,28 @@ export default function BasicPhase() {
     setCourseForm({ ...courseForm, results: newResult });
   };
 
+  const handleInputChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setCourseForm({ ...courseForm, [name]: value });
+  };
+
+  const handleInputResult = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    const newResult = courseForm.results;
+    newResult[index] = e.target.value;
+    setCourseForm({ ...courseForm, results: newResult });
+  };
+
   return (
-    <div className="bg-white ">
-      <form className="space-y-7">
+    <div className="min-h-[455px]">
+      <form className="space-y-7" onSubmit={handleNextButton}>
         {/* Title */}
         <div className="mt-10">
           <label className="block text-sm font-medium mb-3">Course Title</label>
@@ -45,6 +64,8 @@ export default function BasicPhase() {
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter course title..."
             name="title"
+            value={courseForm.title}
+            onChange={handleInputChange}
             required
           />
         </div>
@@ -57,6 +78,8 @@ export default function BasicPhase() {
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter description..."
             name="description"
+            value={courseForm.description}
+            onChange={handleInputChange}
             required
           />
         </div>
@@ -108,6 +131,7 @@ export default function BasicPhase() {
                 value={result}
                 placeholder={`Result ${index + 1}`}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => handleInputResult(e, index)}
                 required
               />
             ))}
@@ -118,7 +142,7 @@ export default function BasicPhase() {
         <div className="text-end">
           <button
             type="submit"
-            className="bg-blue-600 text-white py-3 px-7 rounded-xl font-medium hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white py-3 px-7 rounded-xl font-medium hover:bg-blue-700 transition cursor-pointer"
           >
             Next
           </button>
