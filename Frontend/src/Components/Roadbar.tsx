@@ -7,7 +7,6 @@ interface Phase {
     | "Privacy"
     | "Image (Optional)"
     | "First Lesson"
-    | "Lesson Content"
     | "Video (Optional)";
   status: "done" | "in-progress" | "pending";
 }
@@ -31,10 +30,6 @@ export default function Roadbar() {
       status: "pending",
     },
     {
-      title: "Lesson Content",
-      status: "pending",
-    },
-    {
       title: "Video (Optional)",
       status: "pending",
     },
@@ -54,7 +49,10 @@ export default function Roadbar() {
         <div className="absolute left-3 top-0 h-full w-0.5 bg-gray-300"></div>
 
         {phase.map((item, index) => (
-          <div key={index} className="relative pl-10 mb-15 flex items-center">
+          <div
+            key={index}
+            className="relative pl-10 py-0! mb-15 flex items-center"
+          >
             {/* dot */}
             <div
               className={`absolute left-0 w-7 h-7 rounded-full border-4 border-gray-200 ${phaseNumber > index ? "bg-green-500" : phaseNumber === index ? "bg-yellow-500" : "bg-gray-400"}`}

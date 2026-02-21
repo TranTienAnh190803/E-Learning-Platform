@@ -1,15 +1,13 @@
-import { useCallback, useContext, type SetStateAction } from "react";
-import type React from "react";
+import { useCallback, useContext } from "react";
 import { useDropzone } from "react-dropzone";
 import { CourseAddingContext } from "../Pages/CourseAddingPage";
-import { readFile } from "../Services/CoreService/FileApi";
 
-interface Props {
-  image: string | null;
-  setImage: React.Dispatch<SetStateAction<string | null>>;
-}
+type Props = {
+  video: string | null;
+  setVideo: React.Dispatch<React.SetStateAction<string | null>>;
+};
 
-export default function ImageInput({ image, setImage }: Props) {
+export default function VideoInput({ video, setVideo }: Props) {
   const context = useContext(CourseAddingContext);
 
   if (!context) {
@@ -24,48 +22,58 @@ export default function ImageInput({ image, setImage }: Props) {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
 
-        const formData = new FormData();
-        formData.set("file", file);
-        const response = await readFile(formData);
+        // Tạo Object URL trực tiếp từ File - KHÔNG cần gọi server
+        const videoURL = URL.createObjectURL(file);
+        setVideo(videoURL);
 
-        try {
-          if (response instanceof Blob) {
-            setImage(URL.createObjectURL(response));
-            setCourseForm({ ...courseForm, image: file });
-          } else {
-            alert(response.message);
-          }
-        } catch (error) {
-          alert(error);
-        }
+        setCourseForm({
+          ...courseForm,
+          videoFile: file,
+        });
       }
     },
-    [courseForm, setCourseForm, setImage],
+    [courseForm, setCourseForm, setVideo],
   );
 
-  // DropZone Define
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "video/*": [],
+    },
+    multiple: false,
+  });
 
   return (
     <form className="min-h-[455px]" onSubmit={handleNextButton}>
       <div
         {...getRootProps()}
-        className={`my-8 h-[400px] basis-[45%] flex items-center justify-center border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 hover:text-blue-500 ${
+        className={`my-8 h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 hover:text-blue-500 ${
           isDragActive ? "bg-blue-100 border-blue-500" : "border-gray-400"
         }`}
       >
         <input {...getInputProps()} />
 
-        {image ? (
+        {video ? (
           <div className="h-full w-full flex justify-center">
-            <img src={image} className="block h-full max-w-full" />
+            <video
+              controls
+              className="block h-full max-w-full rounded-lg"
+              onError={(e) => {
+                console.log("Video error:", e);
+                console.log("Video element:", e.currentTarget);
+              }}
+            >
+              <source src={video} type="video/mp4" />
+              Trình duyệt của bạn không hỗ trợ video
+            </video>
           </div>
         ) : isDragActive ? (
-          <p className="text-blue-500">Drop Image Here</p>
+          <p className="text-blue-500">Drop Video Here</p>
         ) : (
-          <p>Choose An Image</p>
+          <p>Choose A Video</p>
         )}
       </div>
+
       <div className="flex justify-between items-center">
         <button
           type="button"
@@ -74,6 +82,7 @@ export default function ImageInput({ image, setImage }: Props) {
         >
           Back
         </button>
+
         <button
           type="submit"
           className="bg-blue-600 text-white py-3 px-7 rounded-xl font-medium hover:bg-blue-700 transition cursor-pointer"

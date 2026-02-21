@@ -6,6 +6,8 @@ import type { CourseAddingForm } from "../Types/Course.type";
 import BasicPhase from "../Components/BasicPhase.CourseAdding";
 import CourseAuthentication from "../Components/Authenticate.CourseAdding";
 import ImageInput from "../Components/ImageInput.CourseAdding";
+import FirstLesson from "../Components/FirstLesson.CourseAdding";
+import VideoInput from "../Components/VideoInput.CourseAdding";
 
 export type CourseAddingContextType = {
   phaseNumber: number;
@@ -21,7 +23,7 @@ export const CourseAddingContext = createContext<
 >(undefined);
 
 export default function CourseAddingPage() {
-  const [phaseNumber, setPhaseNumber] = useState<number>(0);
+  const [phaseNumber, setPhaseNumber] = useState<number>(4);
 
   const [courseForm, setCourseForm] = useState<CourseAddingForm>({
     title: "",
@@ -35,6 +37,9 @@ export default function CourseAddingPage() {
     content: "",
     videoFile: null,
   });
+
+  const [image, setImage] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | null>(null);
 
   const handleBackButton = () => {
     setPhaseNumber((prev) => prev - 1);
@@ -64,7 +69,13 @@ export default function CourseAddingPage() {
             <h1 className="text-4xl font-bold">Course Adding</h1>
             {phaseNumber === 0 && <BasicPhase />}
             {phaseNumber === 1 && <CourseAuthentication />}
-            {phaseNumber === 2 && <ImageInput />}
+            {phaseNumber === 2 && (
+              <ImageInput image={image} setImage={setImage} />
+            )}
+            {phaseNumber === 3 && <FirstLesson />}
+            {phaseNumber === 4 && (
+              <VideoInput video={video} setVideo={setVideo} />
+            )}
           </div>
         </div>
       </CourseAddingContext.Provider>

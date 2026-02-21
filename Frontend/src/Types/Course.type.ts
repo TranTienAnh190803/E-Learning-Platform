@@ -20,10 +20,10 @@ export interface CourseAddingForm {
     description: string,
     publicCourse: boolean,
     password: string,
-    image: FormData | null,
+    image: File | null,
     results: string[],
     lessonTitle: string,
     lessonType: LessonType,
     content: string,
-    videoFile: FormData | null
+    videoFile: File | null
 }
