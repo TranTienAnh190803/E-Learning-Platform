@@ -62,13 +62,6 @@ public class LessonServiceImpl implements LessonService {
 
         var newLesson = lessonRepository.save(lesson);
 
-        String videoUrl = null;
-        if (lessonForm.getVideoFile() != null) {
-            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
-            newLesson.setContentUrl(videoUrl);
-            lessonRepository.save(newLesson);
-        }
-
         // Push Notification to All Student (Call API pushNotification from RealtimeService)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
                 .stream()
@@ -84,6 +77,14 @@ public class LessonServiceImpl implements LessonService {
         var notificationResponse = realtimeService.pushNotification(token, notificationForm);
         if (!notificationResponse.isSuccess())
             throw new CustomBadRequestException(notificationResponse.getMessage());
+
+        // Save Video
+        String videoUrl = null;
+        if (lessonForm.getVideoFile() != null) {
+            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
+            newLesson.setContentUrl(videoUrl);
+            lessonRepository.save(newLesson);
+        }
 
         response.setSuccess(true);
         response.setStatusCode(200);

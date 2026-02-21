@@ -74,13 +74,6 @@ public class CourseServiceImpl implements CourseService {
         );
         var newCourse = courseRepository.save(course);
 
-        String image = null;
-        if (courseForm.getImage() != null) {
-            image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
-            newCourse.setImageUrl(image);
-            courseRepository.save(newCourse);
-        }
-
         // Create First Lesson
         Lesson lesson = new Lesson(
                 courseForm.getLessonTitle(),
@@ -89,9 +82,17 @@ public class CourseServiceImpl implements CourseService {
                 newCourse,
                 LocalDateTime.now()
         );
-
         var newLesson = lessonRepository.save(lesson);
 
+        // Save File
+        // Image (Course)
+        String image = null;
+        if (courseForm.getImage() != null) {
+            image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
+            newCourse.setImageUrl(image);
+            courseRepository.save(newCourse);
+        }
+        // Video (Lesson)
         String videoUrl = null;
         if (courseForm.getVideoFile() != null) {
             videoUrl = fileService.saveVideo(courseForm.getVideoFile(), newLesson.getId(), "lesson");

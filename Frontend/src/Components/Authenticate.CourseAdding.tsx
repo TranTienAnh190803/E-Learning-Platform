@@ -55,7 +55,7 @@ export default function CourseAuthentication() {
               Course Password
             </label>
             <input
-              type="text"
+              type="password"
               value={courseForm.password}
               onChange={handleInputChange}
               placeholder="Enter course password..."

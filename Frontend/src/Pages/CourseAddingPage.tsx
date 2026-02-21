@@ -23,7 +23,7 @@ export const CourseAddingContext = createContext<
 >(undefined);
 
 export default function CourseAddingPage() {
-  const [phaseNumber, setPhaseNumber] = useState<number>(4);
+  const [phaseNumber, setPhaseNumber] = useState<number>(0);
 
   const [courseForm, setCourseForm] = useState<CourseAddingForm>({
     title: "",

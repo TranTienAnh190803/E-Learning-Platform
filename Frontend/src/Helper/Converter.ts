@@ -17,3 +17,25 @@ export const dateTimeFormat = (date: Date): string => {
 
     return `${day}/${month}/${year}`;
 }
+
+export const objectToFormData = (object: object): FormData => {
+    const formData = new FormData();
+
+    Object.entries(object).forEach(([key, value]) => {
+        if (value === null) {
+        }
+        else if (value instanceof File) {
+            formData.append(key, value);
+        }
+        else if (Array.isArray(value)) {
+            value.forEach(item => {
+                formData.append(key, String(item))
+            });
+        }
+        else {
+            formData.append(key, String(value))
+        }
+    });
+
+    return formData;
+}

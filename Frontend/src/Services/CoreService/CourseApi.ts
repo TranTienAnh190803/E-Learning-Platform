@@ -18,12 +18,20 @@ export const getOneCourse = async (courseId: number): Promise<ApiResponse<Course
 }
 
 export const addCourse = async (courseForm: FormData): Promise<ApiResponse<void>> => {
-    const response = await axios.post<ApiResponse<void>>("/course-api/add-course", courseForm);
+    const response = await axios.post<ApiResponse<void>>("/course-api/add-course", courseForm, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
     return response.data;
 }
 
 export const updateCourse = async (courseId: number, courseForm: FormData): Promise<ApiResponse<void>> => {
-    const response = await axios.patch<ApiResponse<void>>(`/course-api/update-course/${courseId}`, courseForm);
+    const response = await axios.patch<ApiResponse<void>>(`/course-api/update-course/${courseId}`, courseForm, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
     return response.data;
 }
 

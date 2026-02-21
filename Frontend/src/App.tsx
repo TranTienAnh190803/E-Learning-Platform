@@ -10,6 +10,7 @@ import { isInstructor, isStudent } from "./Helper/CheckRole";
 import AccountPage from "./Pages/AccountPage";
 import InstructorCoursePage from "./Pages/InstructorCoursePage";
 import CourseAddingPage from "./Pages/CourseAddingPage";
+import ProfilePage from "./Pages/ProfilePage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -31,7 +32,6 @@ function App() {
           {/* INSTRUCTOR PAGE */}
           {auth.status === "authenticated" && isInstructor(auth.user.role) && (
             <>
-              <Route path="/account" element={<AccountPage />} />
               <Route path="/my-course" element={<InstructorCoursePage />} />
               <Route path="/add-course" element={<CourseAddingPage />} />
             </>
@@ -39,10 +39,17 @@ function App() {
 
           {/* STUDENT PAGE */}
           {auth.status === "authenticated" && isStudent(auth.user.role) && (
-            <>
-              <Route path="/account" element={<AccountPage />} />
-            </>
+            <></>
           )}
+
+          {/* INSTRUCTOR & STUDENT PAGE*/}
+          {auth.status === "authenticated" &&
+            (isStudent(auth.user.role) || isInstructor(auth.user.role)) && (
+              <>
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </>
+            )}
         </Routes>
       </BrowserRouter>
     </>
