@@ -15,7 +15,7 @@ export default function Footer() {
     <footer className="py-20 px-30 w-full bg-black text-white flex justify-between">
       <div className="w-[45%]">
         <Link to={"/"} className="flex items-center select-none w-full mb-10">
-          <img src="assets/Logo.jpg" className="rounded-2xl w-1/5" />
+          <img src="/assets/Logo.jpg" className="rounded-2xl w-1/5" />
           <p className="pl-3 font-bold text-white text-[50px]">E-Learning</p>
         </Link>
         <div className="mb-5">

@@ -27,3 +27,12 @@ export interface CourseAddingForm {
     content: string,
     videoFile: File | null
 }
+
+export interface CourseForm {
+    title: string,
+    description: string,
+    publicCourse: boolean,
+    password: string,
+    image: File | null,
+    results: string[],
+}

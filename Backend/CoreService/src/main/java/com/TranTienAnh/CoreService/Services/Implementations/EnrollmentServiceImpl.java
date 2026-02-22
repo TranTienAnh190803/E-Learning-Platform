@@ -7,9 +7,8 @@ import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Enrollment;
-import com.TranTienAnh.CoreService.Repositories.CourseRepository;
-import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
-import com.TranTienAnh.CoreService.Repositories.UserRepository;
+import com.TranTienAnh.CoreService.Models.Entities.LearningProcess;
+import com.TranTienAnh.CoreService.Repositories.*;
 import com.TranTienAnh.CoreService.Services.Interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,10 +30,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private UserRepository userRepository;
 
     @Autowired
+    private LessonRepository lessonRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private RealtimeService realtimeService;
+
+    @Autowired
+    private LearningProcessRepository learningProcessRepository;
 
     @Override
     @PreAuthorize("hasAnyAuthority('STUDENT')")
@@ -106,6 +111,36 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         response.setSuccess(true);
         response.setStatusCode(200);
         response.setData(enrolledCourses);
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> updateProcess(Long courseId, Long lessonId, String email) {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User Not Found"));
+        var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course Not Found"));
+        var enrollment = enrollmentRepository.findByStudentIdAndCourseId(user.getId(), courseId).orElseThrow(() -> new CustomBadRequestException("You haven't enrolled this course yet"));
+        var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson Not Found"));
+
+
+        if (!lesson.getCourse().getId().equals(courseId)) {
+            throw new CustomBadRequestException("This lesson does not belong to this course");
+        }
+
+        LearningProcess learningProcess = new LearningProcess(user, course, lesson);
+        learningProcessRepository.save(learningProcess);
+
+        var lessonList = lessonRepository.findAllByCourseId(courseId);
+        var completedLesson = learningProcessRepository.findAllByStudentIdAndCourseId(user.getId(), courseId);
+        var percentage = ((completedLesson.size() / lessonList.size()) * 100);
+
+        enrollment.setStatus(Math.min(percentage, 100));
+        enrollmentRepository.save(enrollment);
+
+        response.setStatusCode(200);
+        response.setSuccess(true);
 
         return response;
     }

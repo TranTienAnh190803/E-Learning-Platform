@@ -6,3 +6,8 @@ export const getEnrolledCourse = async (): Promise<ApiResponse<EnrollmentData[]>
     const response = await axios.get<ApiResponse<EnrollmentData[]>>("/enrollment-api/get-enrolled-courses");
     return response.data;
 }
+
+export const getEnrolledCourseId = async (): Promise<ApiResponse<number[]>> => {
+    const response = await axios.get<ApiResponse<number[]>>("/enrollment-api/get-courses-for-socket");
+    return response.data;
+}

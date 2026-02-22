@@ -61,7 +61,7 @@ export default function Navbar() {
   return (
     <div className="h-25 px-25 fixed top-0 left-0 right-0 flex justify-between items-center bg-black shadow-xl/20 z-1000">
       <Link to={"/"} className="flex items-center select-none">
-        <img src="assets/Logo.jpg" className="h-15 rounded-2xl" />
+        <img src="/assets/Logo.jpg" className="h-15 rounded-2xl" />
         <p className="pl-3 font-bold text-white text-3xl">
           {auth.status === "authenticated" && isAdmin(auth.user.role)
             ? "Admin"

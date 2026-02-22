@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ export default function InstructorCoursePage() {
   const auth = useAuthStore((s) => s.auth);
 
   // Local State
+  const navigate = useNavigate();
   const [courses, setCourse] = useState<CourseData[]>([]);
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
 
@@ -51,16 +52,16 @@ export default function InstructorCoursePage() {
     <>
       <Navbar />
       <div className="min-h-screen mt-25 px-20 py-10">
-        <div className="flex justify-between items-center py-10">
-          <h1 className="text-5xl font-bold">My Course</h1>
-          <Link
-            to={"/add-course"}
-            className="bg-green-700 text-white px-5 py-3 rounded-3xl font-bold hover:bg-green-200 hover:text-black"
-          >
-            + Add Courses
-          </Link>
-        </div>
-        <div className="bg-white rounded-3xl p-10 pb-30">
+        <div className="bg-white shadow-xl rounded-2xl p-10 pb-30">
+          <div className="flex justify-between items-center mb-10">
+            <h1 className="text-5xl font-bold">My Course</h1>
+            <Link
+              to={"/add-course"}
+              className="bg-green-700 text-white px-5 py-3 rounded-3xl font-bold hover:bg-green-200 hover:text-black"
+            >
+              + Add Courses
+            </Link>
+          </div>
           <div className="flex mt-3 mb-5 items-center justify-end">
             <input
               type="text"
@@ -133,7 +134,12 @@ export default function InstructorCoursePage() {
                               <button className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer">
                                 Details
                               </button>
-                              <button className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                              <button
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  navigate(`/update-course/${value.id}`);
+                                }}
+                              >
                                 Update
                               </button>
                               <button

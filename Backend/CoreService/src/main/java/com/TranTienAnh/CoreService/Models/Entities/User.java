@@ -46,6 +46,15 @@ public class User implements UserDetails {
 
     private String avatarPath;
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Enrollment> enrollments;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserOtp> userOtp;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningProcess> learningProcesses;
+
     public User() {
     }
 

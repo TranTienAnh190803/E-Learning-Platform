@@ -16,7 +16,7 @@ public class CourseForm {
 
     private MultipartFile image;
 
-    private boolean isPublic;
+    private boolean publicCourse;
 
     private String password;
 
@@ -52,12 +52,12 @@ public class CourseForm {
         this.image = image;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isPublicCourse() {
+        return publicCourse;
     }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
+    public void setPublicCourse(boolean publicCourse) {
+        this.publicCourse = publicCourse;
     }
 
     public String getPassword() {

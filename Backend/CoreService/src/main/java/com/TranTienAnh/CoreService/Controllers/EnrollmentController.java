@@ -44,4 +44,13 @@ public class EnrollmentController {
         Response<List<?>> response = enrollmentService.getCourseForSocket(email);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("update-process/{courseId}/{lessonId}")
+    public ResponseEntity<Response<Void>> updateProcess(@PathVariable("courseId") Long courseId, @PathVariable("lessonId") Long lessonId) {
+        Authentication authentication = SecurityContextHolder.createEmptyContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = enrollmentService.updateProcess(courseId, lessonId, email);
+        return ResponseEntity.ok(response);
+    }
 }

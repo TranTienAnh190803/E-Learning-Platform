@@ -159,7 +159,7 @@ public class CourseServiceImpl implements CourseService {
             course.setImageUrl(image);
         }
 
-        if (courseForm.isPublic())
+        if (courseForm.isPublicCourse())
             course.setPassword(null);
         else
             course.setPassword(passwordEncoder.encode(courseForm.getPassword()));
@@ -167,6 +167,7 @@ public class CourseServiceImpl implements CourseService {
         course.setTitle(courseForm.getTitle());
         course.setDescription(courseForm.getDescription());
         course.setResults(courseForm.getResults());
+        course.setPublic(courseForm.isPublicCourse());
         course.setStatus(CourseStatus.Update);
         courseRepository.save(course);
 

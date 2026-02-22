@@ -11,4 +11,6 @@ public interface EnrollmentService {
     Response<List<EnrollmentDto>> getEnrolledCourse(String email);
 
     Response<List<?>> getCourseForSocket(String email);
+
+    Response<Void> updateProcess(Long courseId, Long lessonId, String email);
 }

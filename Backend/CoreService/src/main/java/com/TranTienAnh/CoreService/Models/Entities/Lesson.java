@@ -4,6 +4,7 @@ import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Lesson {
@@ -29,6 +30,9 @@ public class Lesson {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningProcess> learningProcesses;
 
     public Lesson() {
     }
