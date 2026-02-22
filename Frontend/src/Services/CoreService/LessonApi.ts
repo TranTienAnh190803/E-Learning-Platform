@@ -11,8 +11,8 @@ export const addLesson = async (lessonForm: LessonForm, courseId: number): Promi
     return response.data;
 }
 
-export const getAllLesson = async (courseId: number): Promise<ApiResponse<LessonListData>> => {
-    const response = await axios.get<ApiResponse<LessonListData>>(`/lesson-api/public/get-all/${courseId}`);
+export const getAllLesson = async (courseId: number): Promise<ApiResponse<LessonListData[]>> => {
+    const response = await axios.get<ApiResponse<LessonListData[]>>(`/lesson-api/public/get-all/${courseId}`);
     return response.data;
 }
 

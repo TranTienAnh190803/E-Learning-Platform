@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LessonServiceImpl implements LessonService {
@@ -97,12 +99,17 @@ public class LessonServiceImpl implements LessonService {
     public Response<List<LessonListDto>> getAll(Long courseId) {
         Response<List<LessonListDto>> response = new Response<>();
 
-        var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found."));
-
         var lessonList = lessonRepository.findAllByCourseId(courseId)
                 .stream()
-                .map((l) -> new LessonListDto(l.getId(), l.getTitle(), l.getAddedDate()))
-                .toList();
+                .map(l -> new LessonListDto(l.getId(), l.getTitle(), l.getAddedDate()))
+                .collect(Collectors.toList());
+
+        lessonList.sort(
+                Comparator.comparing(
+                        LessonListDto::getAddedDate,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed()
+        );
 
         response.setSuccess(true);
         response.setStatusCode(200);

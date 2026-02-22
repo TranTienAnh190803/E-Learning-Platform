@@ -228,4 +228,22 @@ public class CourseServiceImpl implements CourseService {
 
         return response;
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
+    public Response<List<Long>> getOwnedCourseId(String email) {
+        Response<List<Long>> response = new Response<>();
+
+        var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var courses = courseRepository.findAllByInstructorId(instructor.getId())
+                .stream()
+                .map(Course::getId)
+                .toList();
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setData(courses);
+
+        return response;
+    }
 }

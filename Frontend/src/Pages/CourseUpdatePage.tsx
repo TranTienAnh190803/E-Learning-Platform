@@ -29,7 +29,7 @@ export default function CourseUpdatePage() {
         title: data.title,
         description: data.description,
         results: data.results,
-        publicCourse: data.public,
+        publicCourse: data.publicCourse,
       });
       if (data.imageUrl) {
         const coreService = import.meta.env.VITE_CORE_SERVICE;

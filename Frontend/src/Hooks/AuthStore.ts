@@ -3,10 +3,14 @@ import type { AuthState } from "../Types/Common.type";
 import type { LoginForm } from "../Types/User.type";
 import { getProfile, login } from "../Services/CoreService/UserApi.ts";
 import { socketConnect, socketDisconnect } from "../Configurations/Socket.ts";
+import { isInstructor, isStudent } from "../Helper/CheckRole.ts";
+import { getOwnedCourseId } from "../Services/CoreService/CourseApi.ts";
+import { getEnrolledCourseId } from "../Services/CoreService/EnrollmentApi.ts";
 
 interface AuthStore {
     auth: AuthState,
-    login: (loginForm: LoginForm) => Promise<void>
+    course: number[],
+    login: (loginForm: LoginForm) => Promise<void>,
     logout: () => void,
     initializeAuth: () => Promise<void>
 }
@@ -22,6 +26,8 @@ const getInitialAuthState = (): AuthState => {
 export const useAuthStore = create<AuthStore>((set) => ({
     auth: getInitialAuthState(),
 
+    course: [],
+
     login: async (loginForm) => {
         set({auth: {status: "loading"}})
 
@@ -36,6 +42,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
                 // CONNECT SOCKET
                 socketConnect(response.data.token);
+
+                // Add courseId (INSTRUCTOR: Owned Course, STUDENT: Enrolled Course)
+                if (isInstructor(profile.data.role)) {
+                    const courseResponse = await getOwnedCourseId();
+                    if (courseResponse.success) set({course: courseResponse.data})
+                }
+                if (isStudent(profile.data.role)) {
+                    const courseResponse = await getEnrolledCourseId();
+                    if (courseResponse.success) set({course: courseResponse.data})
+                }
             }
             else {
                 localStorage.removeItem("token");
@@ -53,6 +69,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         localStorage.removeItem("token");
         socketDisconnect(); // DISCONNECT SOCKET
         set({auth: {status: "guest"}});
+        set({course: []});
         window.location.href = "/login";
     },
 
@@ -71,6 +88,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
                 // RECONNECT SOCKET if web reload
                 socketConnect(token);
+
+                // Add courseId (INSTRUCTOR: Owned Course, STUDENT: Enrolled Course)
+                if (isInstructor(profile.data.role)) {
+                    const courseResponse = await getOwnedCourseId();
+                    if (courseResponse.success) set({course: courseResponse.data})
+                }
+                if (isStudent(profile.data.role)) {
+                    const courseResponse = await getEnrolledCourseId();
+                    if (courseResponse.success) set({course: courseResponse.data})
+                }
             } else {
                 localStorage.removeItem("token");
                 set({auth: {status: "guest"}});

@@ -39,3 +39,8 @@ export const deleteCourse = async (courseId: number): Promise<ApiResponse<void>>
     const response = await axios.delete(`/course-apidelete-course/${courseId}`);
     return response.data;
 }
+
+export const getOwnedCourseId = async (): Promise<ApiResponse<number[]>> => {
+    const response = await axios.get<ApiResponse<number[]>>("/course-api/get-owned-courses");
+    return response.data;
+}

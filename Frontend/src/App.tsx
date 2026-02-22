@@ -12,6 +12,7 @@ import InstructorCoursePage from "./Pages/InstructorCoursePage";
 import CourseAddingPage from "./Pages/CourseAddingPage";
 import ProfilePage from "./Pages/ProfilePage";
 import CourseUpdatePage from "./Pages/CourseUpdatePage";
+import CourseDetailPage from "./Pages/CourseDetailPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -37,6 +38,10 @@ function App() {
               <Route
                 path="/update-course/:courseId"
                 element={<CourseUpdatePage />}
+              />
+              <Route
+                path="/course-detail/:courseId"
+                element={<CourseDetailPage />}
               />
               <Route path="/add-course" element={<CourseAddingPage />} />
             </>

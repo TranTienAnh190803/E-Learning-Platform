@@ -43,9 +43,9 @@ export default function Card({ course, fixedBackground }: props) {
         </div>
         <div className="flex justify-end mt-2">
           <p
-            className={`font-bold ${course.public ? "text-green-500" : "text-red-600"}`}
+            className={`font-bold ${course.publicCourse ? "text-green-500" : "text-red-600"}`}
           >
-            {course.public ? "Public course" : "Private course"}
+            {course.publicCourse ? "Public course" : "Private course"}
           </p>
         </div>
       </div>

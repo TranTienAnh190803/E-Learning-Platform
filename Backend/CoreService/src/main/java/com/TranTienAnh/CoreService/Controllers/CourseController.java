@@ -69,4 +69,13 @@ public class CourseController {
         Response<List<CourseDto>> response = courseService.getAllOwnedCourses(email);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("get-owned-courses")
+    public ResponseEntity<Response<List<Long>>> getOwnedCourseId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<List<Long>> response = courseService.getOwnedCourseId(email);
+        return ResponseEntity.ok(response);
+    }
 }

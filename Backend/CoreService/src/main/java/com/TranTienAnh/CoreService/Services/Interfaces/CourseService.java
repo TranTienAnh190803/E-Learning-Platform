@@ -20,4 +20,6 @@ public interface CourseService {
     Response<Void> deleteCourse(String email, Long courseId, String token);
 
     Response<List<CourseDto>> getAllOwnedCourses(String email);
+
+    Response<List<Long>> getOwnedCourseId(String email);
 }

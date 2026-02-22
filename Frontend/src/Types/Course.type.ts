@@ -8,10 +8,10 @@ export interface CourseData {
     description: string,
     status: courseStatus,
     results: string[],
-    imageUrl: string,
+    imageUrl: string | null,
     instructor: string,
     instructorAvatar: string | null,
-    public: boolean
+    publicCourse: boolean
 }
 
 // Form

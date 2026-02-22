@@ -105,7 +105,7 @@ export default function InstructorCoursePage() {
                       <td className="px-4 py-2 place-items-center">
                         {
                           <FaCircle
-                            className={`${value.public ? "text-green-500" : "text-red-500"}`}
+                            className={`${value.publicCourse ? "text-green-500" : "text-red-500"}`}
                           />
                         }
                       </td>
@@ -131,7 +131,12 @@ export default function InstructorCoursePage() {
                               data-menu
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                              <button
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  navigate(`/course-detail/${value.id}`);
+                                }}
+                              >
                                 Details
                               </button>
                               <button

@@ -24,14 +24,14 @@ public class CourseDto {
 
     private String instructor;
 
-    private Boolean isPublic;
+    private Boolean isPublicCourse;
 
     private String instructorAvatar;
 
     public CourseDto() {
     }
 
-    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublic) {
+    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublicCourse) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -39,10 +39,10 @@ public class CourseDto {
         this.results = results;
         this.imageUrl = imageUrl;
         this.instructor = instructor;
-        this.isPublic = isPublic;
+        this.isPublicCourse = isPublicCourse;
     }
 
-    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublic, String instructorAvatar) {
+    public CourseDto(Long id, String title, String description, String status, List<String> results, String imageUrl, String instructor, Boolean isPublicCourse, String instructorAvatar) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -50,7 +50,7 @@ public class CourseDto {
         this.results = results;
         this.imageUrl = imageUrl;
         this.instructor = instructor;
-        this.isPublic = isPublic;
+        this.isPublicCourse = isPublicCourse;
         this.instructorAvatar = instructorAvatar;
     }
 
@@ -110,12 +110,12 @@ public class CourseDto {
         this.instructor = instructor;
     }
 
-    public Boolean getPublic() {
-        return isPublic;
+    public Boolean getPublicCourse() {
+        return isPublicCourse;
     }
 
-    public void setPublic(Boolean aPublic) {
-        isPublic = aPublic;
+    public void setPublicCourse(Boolean publicCourse) {
+        isPublicCourse = publicCourse;
     }
 
     public String getInstructorAvatar() {
