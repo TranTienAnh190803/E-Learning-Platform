@@ -9,6 +9,7 @@ import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
+import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
@@ -71,8 +72,8 @@ public class LessonServiceImpl implements LessonService {
                 .toList();
         NotificationForm notificationForm = new NotificationForm(
                 0,
+                "New lesson added",
                 "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has added more lessons.",
-                "",
                 courseId.toString() + "/" + newLesson.getId().toString(),
                 allStudent
         );
@@ -108,7 +109,7 @@ public class LessonServiceImpl implements LessonService {
                 Comparator.comparing(
                         LessonListDto::getAddedDate,
                         Comparator.nullsLast(Comparator.naturalOrder())
-                ).reversed()
+                )
         );
 
         response.setSuccess(true);
@@ -162,14 +163,17 @@ public class LessonServiceImpl implements LessonService {
             throw new CustomBadRequestException("This course is not belong to you.");
         }
 
-
-        if (lessonForm.getVideoFile() != null) {
+        if (lessonForm.getLessonType() == LessonType.WORK) {
+            lesson.setContentUrl(null);
+        }
+        if (lessonForm.getLessonType() == LessonType.STUDY && lessonForm.getVideoFile() != null) {
             String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
             lesson.setContentUrl(url);
         }
         lesson.setTitle(lessonForm.getTitle());
         lesson.setContent(lessonForm.getContent());
         lesson.setLessonType(lessonForm.getLessonType());
+        lessonRepository.save(lesson);
 
         response.setSuccess(true);
         response.setStatusCode(200);

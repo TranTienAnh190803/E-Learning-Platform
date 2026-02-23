@@ -123,7 +123,9 @@ export default function CourseDetailPage() {
                   Lessons ({lessons.length})
                 </h2>
                 <button
-                  // onClick={onCreateLesson}
+                  onClick={() => {
+                    navigate(`add-lesson`);
+                  }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition cursor-pointer"
                 >
                   + Create Lesson
@@ -154,7 +156,9 @@ export default function CourseDetailPage() {
                         </td>
                         <td className="py-3! px-2! text-center space-x-2">
                           <button
-                            //   onClick={() => onEditLesson(lesson.id)}
+                            onClick={() => {
+                              navigate(`update-lesson/${lesson.id}`);
+                            }}
                             className="px-3 py-1 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 cursor-pointer"
                           >
                             Edit

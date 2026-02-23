@@ -2,12 +2,12 @@ import type { CourseData } from "../Types/Course.type";
 
 interface props {
   course: CourseData;
-  fixedBackground?: boolean;
+  isProfilePage?: boolean;
 }
 
 const coreService = import.meta.env.VITE_CORE_SERVICE;
 
-export default function Card({ course, fixedBackground }: props) {
+export default function Card({ course, isProfilePage }: props) {
   return (
     <div className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110 ">
       <img
@@ -17,7 +17,7 @@ export default function Card({ course, fixedBackground }: props) {
             : "assets/DefaultCourse.jpg"
         }
       />
-      <div className={`p-5 ${fixedBackground ? "bg-gray-100" : "bg-white"}`}>
+      <div className={`p-5 ${isProfilePage ? "bg-gray-100" : "bg-white"}`}>
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-2xl mr-3">{course.title}</h3>
           {course.status !== "Update" && (

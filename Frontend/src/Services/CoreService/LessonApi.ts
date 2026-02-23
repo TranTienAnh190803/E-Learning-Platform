@@ -1,8 +1,8 @@
 import axios from "../../Configurations/AxiosCoreService.ts";
 import type { ApiResponse } from "../../Types/Common.type.ts";
-import type { LessonData, LessonForm, LessonListData } from "../../Types/Lesson.type.ts";
+import type { LessonData, LessonListData } from "../../Types/Lesson.type.ts";
 
-export const addLesson = async (lessonForm: LessonForm, courseId: number): Promise<ApiResponse<void>> => {
+export const addLesson = async (lessonForm: FormData, courseId: number): Promise<ApiResponse<void>> => {
     const response = await axios.post(`/lesson-api/add-lesson/${courseId}`, lessonForm, {
         headers: {
             "Content-Type": "multipart/form-data"
@@ -21,7 +21,7 @@ export const getLesson = async (lessonId: number): Promise<ApiResponse<LessonDat
     return response.data;
 }
 
-export const updateLesson = async (lessonForm: LessonForm, lessonId: number): Promise<ApiResponse<void>> => {
+export const updateLesson = async (lessonForm: FormData, lessonId: number): Promise<ApiResponse<void>> => {
     const response = await axios.patch(`/lesson-api/update-lesson/${lessonId}`, lessonForm, {
         headers: {
             "Content-Type": "multipart/form-data"

@@ -5,7 +5,7 @@ export interface LessonForm {
     title: string;
     lessonType: LessonType;
     content: string;
-    videoFile: File;
+    videoFile: File | null;
 }
 
 // Data
@@ -16,7 +16,7 @@ export interface LessonListData {
 }
 
 export interface LessonData extends LessonListData {
-    lessonType: string;
+    lessonType: LessonType;
     content: string;
     contentUrl: string;
 }

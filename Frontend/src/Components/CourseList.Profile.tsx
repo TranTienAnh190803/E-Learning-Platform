@@ -47,7 +47,7 @@ export default function CourseList() {
       <hr className="my-8" />
       <div className="flex gap-[5%] flex-wrap mt-10">
         {courseList.map((value) => {
-          return <Card course={value} key={value.id} fixedBackground={true} />;
+          return <Card course={value} key={value.id} isProfilePage={true} />;
         })}
       </div>
     </div>
