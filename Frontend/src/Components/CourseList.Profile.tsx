@@ -45,6 +45,13 @@ export default function CourseList() {
         {isInstructor(auth.user.role) ? "My courses" : "Enrolled courses"}
       </h1>
       <hr className="my-8" />
+      {courseList.length === 0 && (
+        <div className="text-center text-gray-500 py-10 text-xl">
+          {isInstructor(auth.user.role)
+            ? "You have no courses"
+            : "You haven't enrolled any course yet"}
+        </div>
+      )}
       <div className="flex gap-[5%] flex-wrap mt-10">
         {courseList.map((value) => {
           return <Card course={value} key={value.id} isProfilePage={true} />;

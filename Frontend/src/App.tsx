@@ -15,6 +15,7 @@ import CourseUpdatePage from "./Pages/CourseUpdatePage";
 import CourseDetailPage from "./Pages/CourseDetailPage";
 import LessonCreatePage from "./Pages/LessonCreatePage";
 import { LessonUpdatePage } from "./Pages/LessonUpdatePage";
+import ProcessTrackingPage from "./Pages/ProcessTrackingPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -59,7 +60,12 @@ function App() {
 
           {/* STUDENT PAGE */}
           {auth.status === "authenticated" && isStudent(auth.user.role) && (
-            <></>
+            <>
+              <Route
+                path="/process-tracking"
+                element={<ProcessTrackingPage />}
+              />
+            </>
           )}
 
           {/* INSTRUCTOR & STUDENT PAGE*/}

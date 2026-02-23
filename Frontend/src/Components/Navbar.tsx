@@ -203,10 +203,10 @@ export default function Navbar() {
                   </Link>
                   {isStudent(auth.user.role) && (
                     <Link
-                      to={"/course"}
+                      to={"/process-tracking"}
                       className="flex items-center py-3 px-5 hover:bg-gray-300 cursor-pointer"
                     >
-                      <FaBook className="mr-3" /> Courses
+                      <FaBook className="mr-3" /> Process Tracking
                     </Link>
                   )}
                   {isInstructor(auth.user.role) && (

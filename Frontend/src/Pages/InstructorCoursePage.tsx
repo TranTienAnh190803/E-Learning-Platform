@@ -173,9 +173,7 @@ export default function InstructorCoursePage() {
                 className="w-1/4"
               />
               <div className="text-gray-500 text-center">
-                <h1 className="font-bold text-3xl my-2">
-                  There Is No Registered User.
-                </h1>
+                <h1 className="font-bold text-3xl my-2">You have no course.</h1>
               </div>
             </div>
           )}

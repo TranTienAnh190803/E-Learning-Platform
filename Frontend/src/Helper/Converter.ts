@@ -14,8 +14,10 @@ export const dateTimeFormat = (date: Date): string => {
     const year = realDate.getFullYear();
     const month = (realDate.getMonth() + 1).toString().padStart(2, "0");
     const day = realDate.getDate().toString().padStart(2, "0");
+    const hour = realDate.getHours().toString().padStart(2, "0");
+    const minute = realDate.getMinutes().toString().padStart(2, "0");
 
-    return `${day}/${month}/${year}`;
+    return `${day}/${month}/${year} - ${hour}:${minute}`;
 }
 
 export const objectToFormData = (object: object): FormData => {
