@@ -17,6 +17,8 @@ import LessonCreatePage from "./Pages/LessonCreatePage";
 import { LessonUpdatePage } from "./Pages/LessonUpdatePage";
 import ProcessTrackingPage from "./Pages/ProcessTrackingPage";
 import CoursePreviewPage from "./Pages/CoursePreviewPage";
+import StudentCoursePage from "./Pages/StudentCoursePage";
+import LessonPage from "./Pages/LessonPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -66,6 +68,10 @@ function App() {
                 path="/process-tracking"
                 element={<ProcessTrackingPage />}
               />
+              <Route
+                path="/student-course/:courseId"
+                element={<StudentCoursePage />}
+              />
             </>
           )}
 
@@ -78,6 +84,10 @@ function App() {
                 <Route
                   path="/course-preview/:courseId"
                   element={<CoursePreviewPage />}
+                />
+                <Route
+                  path="/course/:courseId/lesson/:lessonId"
+                  element={<LessonPage />}
                 />
               </>
             )}

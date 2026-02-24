@@ -8,6 +8,7 @@ import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Enrollment;
 import com.TranTienAnh.CoreService.Models.Entities.LearningProcess;
+import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Repositories.*;
 import com.TranTienAnh.CoreService.Services.Interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +117,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
     public Response<Void> updateProcess(Long courseId, Long lessonId, String email) {
         Response<Void> response = new Response<>();
 
@@ -134,18 +136,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         var lessonList = lessonRepository.findAllByCourseId(courseId);
         var completedLesson = learningProcessRepository.findAllByStudentIdAndCourseId(user.getId(), courseId);
-        var percentage = ((completedLesson.size() / lessonList.size()) * 100);
+        float p =  ((float) completedLesson.size() / lessonList.size()) * 100;
+        var percentage = Math.round(p);
 
         enrollment.setStatus(Math.min(percentage, 100));
         enrollmentRepository.save(enrollment);
 
         response.setStatusCode(200);
         response.setSuccess(true);
+        response.setMessage("Completed");
 
         return response;
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
     public Response<Void> leaveCourse(Long courseId, String email) {
         Response<Void> response = new Response<>();
 
@@ -160,5 +165,25 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         response.setMessage("Leave course successfully");
 
         return  response;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    public Response<List<Long>> getCompletedLesson(Long courseId, String email) {
+        Response<List<Long>> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User Not Found"));
+        var enrollment = enrollmentRepository.findByStudentIdAndCourseId(user.getId(), courseId).orElseThrow(() -> new CustomBadRequestException("You haven't enrolled this course yet"));
+
+        var lessonList = learningProcessRepository.findAllByStudentIdAndCourseId(user.getId(), courseId)
+                .stream()
+                .map(lp -> lp.getLesson().getId())
+                .toList();
+
+        response.setStatusCode(200);
+        response.setSuccess(true);
+        response.setData(lessonList);
+
+        return response;
     }
 }

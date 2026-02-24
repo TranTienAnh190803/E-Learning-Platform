@@ -164,7 +164,7 @@ export default function CourseDetailPage() {
                             {index + 1}. {lesson.title}
                           </td>
                           <td className="py-3! px-2! text-gray-500">
-                            {new Date(lesson.addedDate).toLocaleString()}
+                            {new Date(lesson.addedDate!).toLocaleString()}
                           </td>
                           <td className="py-3! px-2! text-center space-x-2">
                             <button

@@ -45,9 +45,18 @@ public class EnrollmentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("get-completed-lesson/{courseId}")
+    public ResponseEntity<Response<List<Long>>> getCompletedLesson(@PathVariable("courseId") Long courseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<List<Long>> response = enrollmentService.getCompletedLesson(courseId, email);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("update-process/{courseId}/{lessonId}")
     public ResponseEntity<Response<Void>> updateProcess(@PathVariable("courseId") Long courseId, @PathVariable("lessonId") Long lessonId) {
-        Authentication authentication = SecurityContextHolder.createEmptyContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();
         Response<Void> response = enrollmentService.updateProcess(courseId, lessonId, email);

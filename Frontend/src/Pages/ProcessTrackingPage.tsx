@@ -53,7 +53,7 @@ export default function ProcessTrackingPage() {
       <Navbar />
       <div className="flex justify-center min-h-screen py-10 mt-30">
         <div className="w-[85%] space-y-8 ">
-          <h1 className="text-5xl font-bold text-gray-800 mb-20">
+          <h1 className="text-5xl font-bold text-gray-800 mb-20 p-10 bg-white rounded-3xl shadow-lg text-center">
             My Learning Progress
           </h1>
 

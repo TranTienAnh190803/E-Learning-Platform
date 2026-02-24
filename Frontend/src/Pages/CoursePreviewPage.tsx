@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { CourseData, CourseStatus } from "../Types/Course.type";
 import type { LessonListData } from "../Types/Lesson.type";
@@ -13,13 +13,12 @@ import PasswordPopup from "../Components/PasswordPopup";
 
 export default function CoursePreviewPage() {
   const { courseId } = useParams();
+  const navigate = useNavigate();
 
   // Global state
-  const courses = useAuthStore((s) => s.course);
   const auth = useAuthStore((s) => s.auth);
 
   // Local State
-  const navigate = useNavigate();
   const [course, setCourse] = useState<CourseData>({
     id: -1,
     title: "",
@@ -74,7 +73,7 @@ export default function CoursePreviewPage() {
       const response = await enrollCourse(Number(courseId), password);
       alert(response.message);
       if (response.success) {
-        // navigate("");
+        navigate(`/student-course/${courseId}`);
         window.location.reload();
       }
     }
@@ -96,7 +95,7 @@ export default function CoursePreviewPage() {
   return (
     <>
       <Navbar />
-      <div className="flex justify-center bg-gray-100 min-h-screen py-10 mt-25">
+      <div className="flex justify-center min-h-screen py-10 mt-25">
         <div className="w-[80%] grid grid-cols-3 gap-10">
           {/* LEFT CONTENT */}
           <div className="col-span-2 space-y-8">

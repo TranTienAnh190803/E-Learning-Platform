@@ -12,11 +12,11 @@ export interface LessonForm {
 export interface LessonListData {
     id: number;
     title: string;
-    addedDate: Date;
+    addedDate: Date | null;
 }
 
 export interface LessonData extends LessonListData {
     lessonType: LessonType;
     content: string;
-    contentUrl: string;
+    contentUrl: string | null;
 }

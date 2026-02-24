@@ -26,3 +26,8 @@ export const leaveCourse = async (courseId: number): Promise<ApiResponse<void>> 
     const response = await axios.delete(`/enrollment-api/leave-course/${courseId}`);
     return response.data;
 } 
+
+export const getCompletedLesson = async (courseId: number): Promise<ApiResponse<number[]>> => {
+    const response = await axios.get(`/enrollment-api/get-completed-lesson/${courseId}`);
+    return response.data;
+}

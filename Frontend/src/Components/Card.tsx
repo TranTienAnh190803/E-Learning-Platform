@@ -1,3 +1,5 @@
+import { isInstructor, isStudent } from "../Helper/CheckRole";
+import { useAuthStore } from "../Hooks/AuthStore";
 import type { CourseData } from "../Types/Course.type";
 import { useNavigate } from "react-router-dom";
 
@@ -11,27 +13,49 @@ const coreService = import.meta.env.VITE_CORE_SERVICE;
 export default function Card({ course, isProfilePage }: props) {
   const navigate = useNavigate();
 
+  const courses = useAuthStore((s) => s.course);
+  const auth = useAuthStore((s) => s.auth);
+
   const handleClick = () => {
     if (isProfilePage) {
+      if (auth.status === "authenticated" && isInstructor(auth.user.role)) {
+        // navigate(`/lesson/${course.id}`);
+        // window.location.reload();
+      }
+      if (auth.status === "authenticated" && isStudent(auth.user.role)) {
+        navigate(`/student-course/${course.id}`);
+        window.location.reload();
+      }
     } else {
-      navigate(`/course-preview/${course.id}`);
-      window.location.reload();
+      if (courses.includes(course.id)) {
+        navigate(`/student-course/${course.id}`);
+        window.location.reload();
+      } else {
+        navigate(`/course-preview/${course.id}`);
+        window.location.reload();
+      }
     }
   };
 
   return (
     <div
-      className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110"
+      className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110 bg-white flex flex-col"
       onClick={handleClick}
     >
-      <img
-        src={
-          course.imageUrl
-            ? `${coreService}/${course.imageUrl}`
-            : "assets/DefaultCourse.jpg"
-        }
-      />
-      <div className={`p-5 ${isProfilePage ? "bg-gray-100" : "bg-white"}`}>
+      <div className="h-[200px] w-full">
+        <img
+          src={
+            course.imageUrl
+              ? `${coreService}/${course.imageUrl}`
+              : "assets/DefaultCourse.jpg"
+          }
+          className="block w-full h-full"
+        />
+      </div>
+
+      <div
+        className={`p-5 ${isProfilePage ? "bg-gray-100" : "bg-white"} flex-1`}
+      >
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-2xl mr-3">{course.title}</h3>
           {course.status !== "Update" && (

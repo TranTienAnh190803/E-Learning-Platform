@@ -15,4 +15,6 @@ public interface EnrollmentService {
     Response<Void> updateProcess(Long courseId, Long lessonId, String email);
 
     Response<Void> leaveCourse(Long courseId, String email);
+
+    Response<List<Long>> getCompletedLesson(Long courseId, String email);
 }
