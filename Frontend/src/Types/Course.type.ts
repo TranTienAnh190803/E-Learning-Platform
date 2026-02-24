@@ -1,4 +1,4 @@
-export type courseStatus = "New" | "Update" | "Complete"
+export type CourseStatus = "New" | "Update" | "Complete"
 export type LessonType = "STUDY" | "WORK"
 
 // Data
@@ -6,7 +6,7 @@ export interface CourseData {
     id: number,
     title: string,
     description: string,
-    status: courseStatus,
+    status: CourseStatus,
     results: string[],
     imageUrl: string | null,
     instructor: string,

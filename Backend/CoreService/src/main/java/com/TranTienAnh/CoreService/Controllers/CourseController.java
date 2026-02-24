@@ -78,4 +78,13 @@ public class CourseController {
         Response<List<Long>> response = courseService.getOwnedCourseId(email);
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("complete-update-course/{courseId}")
+    public ResponseEntity<Response<Void>> completeUpdateCourse(@PathVariable("courseId") Long courseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = courseService.completeUpdateCourse(email, courseId);
+        return ResponseEntity.ok(response);
+    }
 }

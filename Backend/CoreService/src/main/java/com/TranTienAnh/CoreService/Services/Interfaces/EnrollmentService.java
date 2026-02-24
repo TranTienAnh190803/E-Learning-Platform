@@ -13,4 +13,6 @@ public interface EnrollmentService {
     Response<List<?>> getCourseForSocket(String email);
 
     Response<Void> updateProcess(Long courseId, Long lessonId, String email);
+
+    Response<Void> leaveCourse(Long courseId, String email);
 }

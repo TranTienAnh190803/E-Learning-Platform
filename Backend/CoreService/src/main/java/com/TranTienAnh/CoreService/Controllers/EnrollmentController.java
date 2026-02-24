@@ -53,4 +53,13 @@ public class EnrollmentController {
         Response<Void> response = enrollmentService.updateProcess(courseId, lessonId, email);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("leave-course/{courseId}")
+    public ResponseEntity<Response<Void>> leaveCourse(@PathVariable("courseId") Long courseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = enrollmentService.leaveCourse(courseId, email);
+        return ResponseEntity.ok(response);
+    }
 }

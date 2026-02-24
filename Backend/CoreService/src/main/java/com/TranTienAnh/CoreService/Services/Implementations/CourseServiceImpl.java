@@ -246,4 +246,22 @@ public class CourseServiceImpl implements CourseService {
 
         return response;
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
+    public Response<Void> completeUpdateCourse(String email, Long courseId) {
+        Response<Void> response = new Response<>();
+
+        var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        course.setStatus(CourseStatus.Complete);
+        courseRepository.save(course);
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Course have completed.");
+
+        return response;
+    }
 }

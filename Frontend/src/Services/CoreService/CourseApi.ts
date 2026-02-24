@@ -44,3 +44,8 @@ export const getOwnedCourseId = async (): Promise<ApiResponse<number[]>> => {
     const response = await axios.get<ApiResponse<number[]>>("/course-api/get-owned-courses");
     return response.data;
 }
+
+export const completeUpdateCourse = async (courseId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.patch(`/course-api/complete-update-course/${courseId}`);
+    return response.data;
+}

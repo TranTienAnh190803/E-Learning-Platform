@@ -1,4 +1,5 @@
 import type { CourseData } from "../Types/Course.type";
+import { useNavigate } from "react-router-dom";
 
 interface props {
   course: CourseData;
@@ -8,8 +9,21 @@ interface props {
 const coreService = import.meta.env.VITE_CORE_SERVICE;
 
 export default function Card({ course, isProfilePage }: props) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (isProfilePage) {
+    } else {
+      navigate(`/course-preview/${course.id}`);
+      window.location.reload();
+    }
+  };
+
   return (
-    <div className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110 ">
+    <div
+      className="w-[30%] mb-20 rounded-3xl overflow-hidden cursor-pointer duration-300 ease-in-out hover:scale-110"
+      onClick={handleClick}
+    >
       <img
         src={
           course.imageUrl

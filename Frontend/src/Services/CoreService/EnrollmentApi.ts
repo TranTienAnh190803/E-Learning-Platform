@@ -21,3 +21,8 @@ export const updateProcess = async (courseId: number, lessonId: number): Promise
     const response = await axios.post(`/enrollment-api/update-process/${courseId}/${lessonId}`);
     return response.data;
 }
+
+export const leaveCourse = async (courseId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.delete(`/enrollment-api/leave-course/${courseId}`);
+    return response.data;
+} 

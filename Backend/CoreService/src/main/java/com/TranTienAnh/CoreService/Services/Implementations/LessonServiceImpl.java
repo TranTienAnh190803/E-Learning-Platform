@@ -9,6 +9,7 @@ import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
+import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
 import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
@@ -64,6 +65,9 @@ public class LessonServiceImpl implements LessonService {
         );
 
         var newLesson = lessonRepository.save(lesson);
+
+        course.setStatus(CourseStatus.Update);
+        courseRepository.save(course);
 
         // Push Notification to All Student (Call API pushNotification from RealtimeService)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)

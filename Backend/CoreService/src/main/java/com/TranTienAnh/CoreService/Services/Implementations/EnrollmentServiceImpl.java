@@ -144,4 +144,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         return response;
     }
+
+    @Override
+    public Response<Void> leaveCourse(Long courseId, String email) {
+        Response<Void> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var course = courseRepository.findById(courseId).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        var enrollment = enrollmentRepository.findByStudentIdAndCourseId(user.getId(), course.getId()).orElseThrow(() -> new CustomBadRequestException("You haven't enrolled this course yet."));
+        enrollmentRepository.delete(enrollment);
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Leave course successfully");
+
+        return  response;
+    }
 }

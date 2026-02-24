@@ -16,6 +16,7 @@ import CourseDetailPage from "./Pages/CourseDetailPage";
 import LessonCreatePage from "./Pages/LessonCreatePage";
 import { LessonUpdatePage } from "./Pages/LessonUpdatePage";
 import ProcessTrackingPage from "./Pages/ProcessTrackingPage";
+import CoursePreviewPage from "./Pages/CoursePreviewPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -74,6 +75,10 @@ function App() {
               <>
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route
+                  path="/course-preview/:courseId"
+                  element={<CoursePreviewPage />}
+                />
               </>
             )}
         </Routes>

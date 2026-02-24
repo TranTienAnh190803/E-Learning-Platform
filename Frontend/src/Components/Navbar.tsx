@@ -160,7 +160,7 @@ export default function Navbar() {
                 <img
                   src={
                     auth.user.avatar === null
-                      ? "assets/User.jpg"
+                      ? "/assets/User.jpg"
                       : auth.user.avatar
                   }
                   className="h-full aspect-square"
@@ -183,7 +183,7 @@ export default function Navbar() {
                     <img
                       src={
                         auth.user.avatar === null
-                          ? "assets/User.jpg"
+                          ? "/assets/User.jpg"
                           : auth.user.avatar
                       }
                       className="h-full aspect-square"

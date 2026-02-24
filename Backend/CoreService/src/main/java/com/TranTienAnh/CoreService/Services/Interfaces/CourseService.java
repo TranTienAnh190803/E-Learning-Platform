@@ -22,4 +22,6 @@ public interface CourseService {
     Response<List<CourseDto>> getAllOwnedCourses(String email);
 
     Response<List<Long>> getOwnedCourseId(String email);
+
+    Response<Void> completeUpdateCourse(String email, Long courseId);
 }
