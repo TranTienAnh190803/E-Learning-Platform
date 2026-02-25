@@ -1,3 +1,4 @@
+import { getIO } from "../Config/socket.js";
 import { Notification } from "../Models/Notification.Model.js";
 
 export const getAllNotification = async (req, res) => {
@@ -6,6 +7,7 @@ export const getAllNotification = async (req, res) => {
   try {
     const notification = await Notification.find({ userId: userId })
       .select("-userId -__v")
+      .sort({ sendAt: -1 })
       .lean();
     if (notification.length > 0)
       return res.status(200).json({
@@ -17,6 +19,7 @@ export const getAllNotification = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "There is no notification",
+      data: [],
       statusCode: 200,
     });
   } catch (error) {
@@ -29,7 +32,7 @@ export const getAllNotification = async (req, res) => {
 };
 
 export const pushNotification = async (req, res) => {
-  const { type, title, content, contentId, receivers } = req.body;
+  const { type, title, content, contentId, receivers, courseId } = req.body;
 
   try {
     let notification = {
@@ -37,34 +40,54 @@ export const pushNotification = async (req, res) => {
       type: type,
       title: title,
       content: content,
+      sendAt: new Date(),
       isRead: false,
       readAt: null,
     };
+    const io = getIO();
 
     if (type === 0) {
       // New lesson (contentId = lessonId)
       notification = {
         ...notification,
-        contentUrl: contentId,
+        contentUrl: `/course/${courseId}/lesson/${contentId}`,
       };
 
+      // Query DB
       await Notification.create(notification);
+      // Push Notification Realtime
+      io.to(`student-notification:${courseId}`).emit(
+        "push-notification",
+        notification,
+      );
     } else if (type === 1) {
-      // New student (contentId = 'course's student list')
+      // New student
       notification = {
         ...notification,
-        contentUrl: contentId,
+        contentUrl: `/course-detail/${courseId}`,
       };
 
+      // Query DB
       await Notification.create(notification);
+      // Push Notification Realtime
+      io.to(`instructor-notification:${courseId}`).emit(
+        "push-notification",
+        notification,
+      );
     } else if (type === 2) {
       // Delete course (contentId = null)
       notification = {
         ...notification,
-        contentUrl: contentId,
+        contentUrl: null,
       };
 
+      // Query DB
       await Notification.create(notification);
+      // Push Notification Realtime
+      io.to(`student-notification:${courseId}`).emit(
+        "push-notification",
+        notification,
+      );
     } else {
       return res.status(400).json({
         statusCode: 400,
@@ -72,7 +95,6 @@ export const pushNotification = async (req, res) => {
         message: "Incorrect type input",
       });
     }
-
     return res.status(200).json({
       statusCode: 200,
       success: true,

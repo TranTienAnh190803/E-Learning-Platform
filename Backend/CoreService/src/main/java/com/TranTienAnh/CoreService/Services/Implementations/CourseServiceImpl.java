@@ -197,9 +197,10 @@ public class CourseServiceImpl implements CourseService {
                 .map(e -> e.getStudent().getId())
                 .toList();
         NotificationForm notificationForm = new NotificationForm(
+                courseId,
                 2,
+                "Course Deleted",
                 "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has been deleted.",
-                "",
                 null,
                 allStudent
         );

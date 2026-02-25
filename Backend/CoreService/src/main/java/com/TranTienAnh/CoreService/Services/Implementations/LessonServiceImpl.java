@@ -75,10 +75,11 @@ public class LessonServiceImpl implements LessonService {
                 .map(e -> e.getStudent().getId())
                 .toList();
         NotificationForm notificationForm = new NotificationForm(
+                courseId,
                 0,
                 "New lesson added",
                 "The course " + course.getTitle() + " of instructor " + course.getInstructor().getFullName() + "has added more lessons.",
-                courseId.toString() + "/" + newLesson.getId().toString(),
+                lesson.getId().toString(),
                 allStudent
         );
         var notificationResponse = realtimeService.pushNotification(token, notificationForm);

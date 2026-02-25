@@ -30,7 +30,6 @@ const NotificationSchema = new mongoose.Schema({
   },
   sendAt: {
     type: Date,
-    default: Date.now,
     required: false,
   },
   isRead: {

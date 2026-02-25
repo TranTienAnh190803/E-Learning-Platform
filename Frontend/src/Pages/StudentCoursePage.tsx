@@ -15,13 +15,19 @@ export default function StudentCoursePage() {
   const fetchLessons = async () => {
     const response = await getAllLesson(Number(courseId));
     if (response.success) setLessons(response.data!);
-    else alert(response.message);
+    else {
+      alert(response.message);
+      navigate("/");
+    }
   };
 
   const fetchCompletedLesson = async () => {
     const response = await getCompletedLesson(Number(courseId));
     if (response.success) setCompletedLesson(response.data!);
-    else alert(response.message);
+    else {
+      alert(response.message);
+      navigate("/");
+    }
   };
 
   useEffect(() => {

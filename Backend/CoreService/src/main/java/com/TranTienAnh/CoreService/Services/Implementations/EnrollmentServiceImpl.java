@@ -65,10 +65,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         // Gửi thông báo đến giảng viên (gọi API pushNotification - pushNotification là side job)
         List<Long> instructorId = List.of(course.getInstructor().getId());
         NotificationForm notificationForm = new NotificationForm(
+                courseId,
                 1,
+                "A student has joined your course.",
                 "Student " + user.getFullName() + " has enrolled course " + course.getTitle(),
-                "",
-                "/student-list",
+                courseId.toString(),
                 instructorId
         );
         var notificationResponse = realtimeService.pushNotification(token, notificationForm);

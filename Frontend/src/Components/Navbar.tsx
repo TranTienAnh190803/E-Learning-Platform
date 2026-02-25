@@ -11,6 +11,7 @@ import {
   readAllNotification,
   readNotification,
 } from "../Services/RealTimeService/NotificationApi";
+import { getSocket } from "../Configurations/Socket";
 
 export default function Navbar() {
   // Global State
@@ -57,6 +58,25 @@ export default function Navbar() {
     if (response.success) fetchAllNotification();
     else alert(response.message);
   };
+
+  // Socket
+  const handleNotification = (data: NotificationData) => {
+    setNotification((prev) => {
+      const oldData = prev;
+      oldData.unshift(data);
+      return oldData;
+    });
+  };
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    socket?.on("push-notification", handleNotification);
+
+    return () => {
+      socket?.off("push-notification", handleNotification);
+    };
+  }, []);
 
   return (
     <div className="h-25 px-25 fixed top-0 left-0 right-0 flex justify-between items-center bg-black shadow-xl/20 z-1000">
@@ -108,9 +128,10 @@ export default function Navbar() {
             >
               <FaBell />
             </div>
-            {notification.some((value) => !value.isRead) && (
-              <div className="absolute top-2 right-6 w-[10px] aspect-square bg-red-500 rounded-full"></div>
-            )}
+            {notification.length > 0 &&
+              notification.some((value) => !value.isRead) && (
+                <div className="absolute top-2 right-6 w-[10px] aspect-square bg-red-500 rounded-full"></div>
+              )}
             {openNotification && (
               <div
                 className="absolute right-0 top-15 min-w-[450px] min-h-[70vh] bg-white text-black rounded-2xl overflow-y-scroll scrollbar-hide shadow-xl/15"

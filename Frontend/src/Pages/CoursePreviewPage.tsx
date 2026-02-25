@@ -70,7 +70,7 @@ export default function CoursePreviewPage() {
     if (!course.publicCourse) {
       setPopup(true);
     } else {
-      const response = await enrollCourse(Number(courseId), password);
+      const response = await enrollCourse(Number(courseId), "1");
       alert(response.message);
       if (response.success) {
         navigate(`/student-course/${courseId}`);
@@ -159,7 +159,7 @@ export default function CoursePreviewPage() {
                       {index + 1}. {lesson.title}
                     </span>
                     <span className="text-gray-400">
-                      {new Date(lesson.addedDate).toLocaleDateString()}
+                      {new Date(lesson.addedDate!).toLocaleDateString()}
                     </span>
                   </div>
                 ))}

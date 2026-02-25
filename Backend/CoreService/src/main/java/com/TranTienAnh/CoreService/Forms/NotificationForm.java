@@ -3,6 +3,8 @@ package com.TranTienAnh.CoreService.Forms;
 import java.util.List;
 
 public class NotificationForm {
+    private Long courseId;
+
     private int type;
 
     private String title;
@@ -16,12 +18,21 @@ public class NotificationForm {
     public NotificationForm() {
     }
 
-    public NotificationForm(int type, String title, String content, String contentId, List<Long> receivers) {
+    public NotificationForm(Long courseId, int type, String title, String content, String contentId, List<Long> receivers) {
+        this.courseId = courseId;
         this.type = type;
         this.title = title;
         this.content = content;
         this.contentId = contentId;
         this.receivers = receivers;
+    }
+
+    public Long getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Long courseId) {
+        this.courseId = courseId;
     }
 
     public int getType() {
