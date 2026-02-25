@@ -14,6 +14,13 @@ export interface CourseData {
     publicCourse: boolean
 }
 
+export interface CourseMemberData {
+    studentId: number;
+    fullName: string;
+    email: string;
+    avatarUrl: string;
+}
+
 // Form
 export interface CourseAddingForm {
     title: string,

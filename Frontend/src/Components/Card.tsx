@@ -47,7 +47,7 @@ export default function Card({ course, isProfilePage }: props) {
           src={
             course.imageUrl
               ? `${coreService}/${course.imageUrl}`
-              : "assets/DefaultCourse.jpg"
+              : "/assets/DefaultCourse.jpg"
           }
           className="block w-full h-full"
         />
@@ -72,7 +72,7 @@ export default function Card({ course, isProfilePage }: props) {
               src={
                 course.instructorAvatar
                   ? `${coreService}/${course.instructorAvatar}`
-                  : "assets/User.jpg"
+                  : "/assets/User.jpg"
               }
               className="w-full aspect-square"
             />

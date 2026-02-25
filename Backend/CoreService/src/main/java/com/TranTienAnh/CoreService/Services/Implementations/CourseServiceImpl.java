@@ -2,6 +2,7 @@ package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.API.RealtimeService;
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
+import com.TranTienAnh.CoreService.DTOs.CourseMemberDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
@@ -11,6 +12,7 @@ import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
+import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.LessonRepository;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -261,6 +264,54 @@ public class CourseServiceImpl implements CourseService {
         response.setSuccess(true);
         response.setStatusCode(200);
         response.setMessage("Course have completed.");
+
+        return response;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('INSTRUCTOR', 'STUDENT')")
+    public Response<List<CourseMemberDto>> getMemeber(String email, Long courseId) {
+        Response<List<CourseMemberDto>> response = new Response<>();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        List<CourseMemberDto> result = List.of();
+
+        if (user.getRole() == Role.INSTRUCTOR) {
+            var course = courseRepository.findByIdAndInstructorId(courseId, user.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+            result = enrollmentRepository.findAllByCourseId(courseId)
+                    .stream()
+                    .map(e -> new CourseMemberDto(e.getStudent().getId(), e.getStudent().getFullName(), e.getStudent().getEmail(), e.getStudent().getAvatarPath()))
+                    .toList();
+        }
+        if (user.getRole() == Role.STUDENT) {
+            var enrollment = enrollmentRepository.findByStudentIdAndCourseId(user.getId(), courseId).orElseThrow(() -> new CustomBadRequestException("You haven't enrolled this course."));
+            result = enrollmentRepository.findAllByCourseId(courseId)
+                    .stream()
+                    .map(e -> new CourseMemberDto(e.getStudent().getId(), e.getStudent().getFullName(), e.getStudent().getEmail(), e.getStudent().getAvatarPath()))
+                    .toList();
+        }
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setData(result);
+
+
+        return response;
+    }
+
+    @Override
+    public Response<Void> kickMember(String email, Long courseId, Long studentId) {
+        Response<Void> response = new Response<>();
+
+        var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+        var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        var enrollment = enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).orElseThrow(() -> new CustomNotFoundException("This student is not belong to this course."));
+        enrollmentRepository.delete(enrollment);
+
+        response.setSuccess(true);
+        response.setStatusCode(200);
+        response.setMessage("Remove member successfully.");
 
         return response;
     }

@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Services.Interfaces;
 
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
+import com.TranTienAnh.CoreService.DTOs.CourseMemberDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Forms.CourseCreateForm;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
@@ -24,4 +25,8 @@ public interface CourseService {
     Response<List<Long>> getOwnedCourseId(String email);
 
     Response<Void> completeUpdateCourse(String email, Long courseId);
+
+    Response<List<CourseMemberDto>> getMemeber(String email, Long courseId);
+
+    Response<Void> kickMember(String email, Long courseId, Long studentId);
 }

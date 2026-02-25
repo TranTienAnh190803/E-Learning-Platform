@@ -1,6 +1,6 @@
 import axios from "../../Configurations/AxiosCoreService.ts";
 import type { ApiResponse } from "../../Types/Common.type";
-import type { CourseData } from "../../Types/Course.type.ts";
+import type { CourseData, CourseMemberData } from "../../Types/Course.type.ts";
 
 export const getOwnedCourse = async (): Promise<ApiResponse<CourseData[]>> => {
     const response = await axios.get<ApiResponse<CourseData[]>>("/course-api/get-all-owned-courses");
@@ -47,5 +47,15 @@ export const getOwnedCourseId = async (): Promise<ApiResponse<number[]>> => {
 
 export const completeUpdateCourse = async (courseId: number): Promise<ApiResponse<void>> => {
     const response = await axios.patch(`/course-api/complete-update-course/${courseId}`);
+    return response.data;
+}
+
+export const getCourseMemeber = async (courseId: number): Promise<ApiResponse<CourseMemberData[]>> => {
+    const response = await axios.get<ApiResponse<CourseMemberData[]>>(`/course-api/get-member/${courseId}`);
+    return response.data;
+}
+
+export const kickMember = async (courseId: number, studentId: number): Promise<ApiResponse<void>> => {
+    const response = await axios.delete(`/course-api/kick-member/${courseId}/${studentId}`);
     return response.data;
 }

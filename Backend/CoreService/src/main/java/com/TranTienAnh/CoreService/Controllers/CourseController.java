@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Controllers;
 
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
+import com.TranTienAnh.CoreService.DTOs.CourseMemberDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Forms.CourseCreateForm;
 import com.TranTienAnh.CoreService.Forms.CourseForm;
@@ -85,6 +86,24 @@ public class CourseController {
         assert authentication != null;
         String email = authentication.getName();
         Response<Void> response = courseService.completeUpdateCourse(email, courseId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("get-member/{courseId}")
+    public ResponseEntity<Response<List<CourseMemberDto>>> getMember(@PathVariable("courseId") Long courseId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<List<CourseMemberDto>> response = courseService.getMemeber(email, courseId);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("kick-member/{courseId}/{studentId}")
+    public ResponseEntity<Response<Void>> kickMember(@PathVariable("courseId") Long courseId, @PathVariable("studentId") Long studentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String email = authentication.getName();
+        Response<Void> response = courseService.kickMember(email, courseId, studentId);
         return ResponseEntity.ok(response);
     }
 }
