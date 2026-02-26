@@ -4,6 +4,7 @@ import "dotenv/config";
 import { corsConfig } from "./Config/cors.js";
 import { authentication } from "./Middlewares/JWTAuthentication.js";
 import notificationRoute from "./Routes/Notification.Route.js";
+import chatRoomRoute from "./Routes/ChatRoom.Route.js";
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use(authentication);
 
 // Route
 app.use("/notification-api", notificationRoute);
+app.use("/chat-room-api", chatRoomRoute);
 
 export default app;
