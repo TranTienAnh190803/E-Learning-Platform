@@ -27,7 +27,8 @@ public class CourseController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();
-        Response<Void> response = courseService.addCourse(email, courseForm);
+        String token = (String) authentication.getDetails();
+        Response<Void> response = courseService.addCourse(email, token, courseForm);
         return ResponseEntity.ok(response);
     }
 

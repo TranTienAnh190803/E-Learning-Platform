@@ -2,7 +2,9 @@ import express from "express";
 import {
   createChatRoom,
   deleteChatRoom,
-  getOwnedChatRoom,
+  getChat,
+  getMemberId,
+  getParticipatedChatRoom,
   joinChatRoom,
   leaveChatRoom,
 } from "../Controllers/ChatRoom.Controller.js";
@@ -10,14 +12,16 @@ import { authorization } from "../Middlewares/JWTAuthorization.js";
 
 const route = express.Router();
 
-route.post("/create-chat-room", authorization("INSTRUCTOR"), createChatRoom);
-route.post("/join-chat-room", authorization("STUDENT"), joinChatRoom);
-route.post("/leave-chat-room", leaveChatRoom);
-route.delete("/delete-chat-room", authorization("INSTRUCTOR"), deleteChatRoom);
-route.get(
-  "/get-owned-chat-room",
+route.post("/create-chat-room", authorization("INSTRUCTOR"), createChatRoom); // CoreService call (create course)
+route.post("/join-chat-room", authorization("STUDENT"), joinChatRoom); // CoreService call (enroll course)
+route.post("/leave-chat-room", leaveChatRoom); // CoreService call (leave/kick course)
+route.delete(
+  "/delete-chat-room/:courseId",
   authorization("INSTRUCTOR"),
-  getOwnedChatRoom,
-);
+  deleteChatRoom,
+); // CoreService call (delete course)
+route.get("/get-member-id", getMemberId);
+route.get("/get-participated-chat-room/:memberId", getParticipatedChatRoom);
+route.get("/get-chat/:chatRoomId", getChat);
 
 export default route;

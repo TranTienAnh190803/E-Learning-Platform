@@ -15,11 +15,6 @@ const MemberSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  isRead: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
 });
 
 export const Member = mongoose.model("Member", MemberSchema);

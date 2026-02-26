@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
 import { getIO } from "../Config/socket.js";
 import { ChatRoom } from "../Models/ChatRoom.Model.js";
 import { Member } from "../Models/MemberSchema.Model.js";
+import { Message } from "../Models/Message.Model.js";
 
 export const createChatRoom = async (req, res) => {
   const { courseId, title, email, fullname, userId } = req.body;
@@ -22,7 +24,6 @@ export const createChatRoom = async (req, res) => {
         courseId: courseId,
         roomName: title,
         member: [addedMember._id],
-        ownerId: userId,
       };
       await ChatRoom.create(chatRoom);
     } else {
@@ -30,7 +31,6 @@ export const createChatRoom = async (req, res) => {
         courseId: courseId,
         roomName: title,
         member: [member._id],
-        ownerId: userId,
       };
       await ChatRoom.create(chatRoom);
     }
@@ -169,20 +169,80 @@ export const deleteChatRoom = async (req, res) => {
   }
 };
 
-export const getOwnedChatRoom = async (req, res) => {
+export const getMemberId = async (req, res) => {
   const { userId } = req.user;
 
   try {
-    const ownedChatRoom = await ChatRoom.find({ ownerId: userId })
-      .select("-member -_v")
-      .lean();
-    if (ownedChatRoom && ownedChatRoom.length > 0) {
+    const member = await Member.findOne({ userId: userId });
+    if (member) {
       return res.status(200).json({
         success: true,
-        data: ownedChatRoom,
+        data: member._id,
         statusCode: 200,
       });
     }
+
+    return res.status(404).json({
+      success: false,
+      statusCode: 404,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      statusCode: 500,
+    });
+  }
+};
+
+export const getParticipatedChatRoom = async (req, res) => {
+  const { memberId } = req.params;
+
+  try {
+    const chatRooms = await ChatRoom.find({
+      member: new mongoose.Types.ObjectId(memberId),
+    })
+      .select("-member -__v")
+      .lean();
+    if (chatRooms && chatRooms.length > 0) {
+      return res.status(200).json({
+        success: true,
+        data: chatRooms,
+        statusCode: 200,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: [],
+      statusCode: 200,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      statusCode: 500,
+    });
+  }
+};
+
+export const getChat = async (req, res) => {
+  const { chatRoomId } = req.params;
+
+  try {
+    const chat = await Message.find({
+      chatRoom: new mongoose.Types.ObjectId(chatRoomId),
+    })
+      .select("-__v")
+      .sort({ sendAt: -1 })
+      .lean();
+
+    if (chat.length > 0)
+      return res.status(200).json({
+        success: true,
+        data: notification,
+        statusCode: 200,
+      });
 
     return res.status(200).json({
       success: true,

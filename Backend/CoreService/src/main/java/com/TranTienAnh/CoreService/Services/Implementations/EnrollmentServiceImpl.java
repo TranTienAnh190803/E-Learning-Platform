@@ -5,6 +5,8 @@ import com.TranTienAnh.CoreService.DTOs.EnrollmentDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
+import com.TranTienAnh.CoreService.Forms.ChatRoomForm;
+import com.TranTienAnh.CoreService.Forms.ChatRoomLeavingForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Enrollment;
 import com.TranTienAnh.CoreService.Models.Entities.LearningProcess;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,6 +64,17 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 0
         );
         enrollmentRepository.save(enrollment);
+
+        // Tham gia luôn vào phòng chat
+        ChatRoomForm chatRoomForm = new ChatRoomForm(
+                course.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getId()
+        );
+        var chatRoomResponse = realtimeService.joinChatRoom(token, chatRoomForm);
+        if (!chatRoomResponse.isSuccess())
+            throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
         // Gửi thông báo đến giảng viên (gọi API pushNotification - pushNotification là side job)
         List<Long> instructorId = List.of(course.getInstructor().getId());
@@ -152,7 +166,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('STUDENT')")
-    public Response<Void> leaveCourse(Long courseId, String email) {
+    @Transactional
+    public Response<Void> leaveCourse(Long courseId, String email, String token) {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
@@ -161,11 +176,17 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         var enrollment = enrollmentRepository.findByStudentIdAndCourseId(user.getId(), course.getId()).orElseThrow(() -> new CustomBadRequestException("You haven't enrolled this course yet."));
         enrollmentRepository.delete(enrollment);
 
+        // Rời phòng chat
+        ChatRoomLeavingForm chatRoomLeavingForm = new ChatRoomLeavingForm(course.getId(), user.getId());
+        var chatRoomResponse = realtimeService.leaveChatRoom(token, chatRoomLeavingForm);
+        if (!chatRoomResponse.isSuccess())
+            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+
         response.setSuccess(true);
         response.setStatusCode(200);
         response.setMessage("Leave course successfully");
 
-        return  response;
+        return response;
     }
 
     @Override

@@ -6,9 +6,7 @@ import com.TranTienAnh.CoreService.DTOs.CourseMemberDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
-import com.TranTienAnh.CoreService.Forms.CourseCreateForm;
-import com.TranTienAnh.CoreService.Forms.CourseForm;
-import com.TranTienAnh.CoreService.Forms.NotificationForm;
+import com.TranTienAnh.CoreService.Forms.*;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
@@ -56,7 +54,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
-    public Response<Void> addCourse(String email, CourseCreateForm courseForm) throws IOException {
+    public Response<Void> addCourse(String email, String token, CourseCreateForm courseForm) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
@@ -86,6 +84,18 @@ public class CourseServiceImpl implements CourseService {
                 LocalDateTime.now()
         );
         var newLesson = lessonRepository.save(lesson);
+
+        // Create Chat Room
+        ChatRoomCreateForm chatRoomForm = new ChatRoomCreateForm(
+                newCourse.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getId(),
+                newCourse.getTitle()
+        );
+        var chatRoomResponse = realtimeService.createChatRoom(token, chatRoomForm);
+        if (!chatRoomResponse.isSuccess())
+            throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
         // Save File
         // Image (Course)
@@ -190,6 +200,11 @@ public class CourseServiceImpl implements CourseService {
         var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
         courseRepository.delete(course);
+
+        // Delete chat room
+        var chatRoomResponse = realtimeService.deleteChatRoom(token, courseId);
+        if (!chatRoomResponse.isSuccess())
+            throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
         // Push Notification (Call API pushNotification - pushNotification is main job)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)

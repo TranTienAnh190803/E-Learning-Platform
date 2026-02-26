@@ -68,7 +68,8 @@ public class EnrollmentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();
-        Response<Void> response = enrollmentService.leaveCourse(courseId, email);
+        String token = (String) authentication.getDetails();
+        Response<Void> response = enrollmentService.leaveCourse(courseId, email, token);
         return ResponseEntity.ok(response);
     }
 }

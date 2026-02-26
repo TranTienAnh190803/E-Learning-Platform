@@ -16,10 +16,6 @@ const ChatRoomSchema = new mongoose.Schema({
       ref: "Member",
     },
   ],
-  ownerId: {
-    type: Number,
-    required: true,
-  },
 });
 
 export const ChatRoom = mongoose.model("ChatRoom", ChatRoomSchema);

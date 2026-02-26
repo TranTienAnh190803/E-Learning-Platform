@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface CourseService {
-    Response<Void> addCourse(String email, CourseCreateForm courseForm) throws IOException;
+    Response<Void> addCourse(String email, String token, CourseCreateForm courseForm) throws IOException;
 
     Response<CourseDto> getCourse(Long courseId);
 
