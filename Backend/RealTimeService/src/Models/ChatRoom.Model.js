@@ -10,12 +10,15 @@ const ChatRoomSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  member: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Member",
-    },
-  ],
 });
+
+ChatRoomSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function () {
+    const chatRoomId = this._id;
+    await mongoose.model("Participation").deleteMany({ chatRoom: chatRoomId });
+  },
+);
 
 export const ChatRoom = mongoose.model("ChatRoom", ChatRoomSchema);

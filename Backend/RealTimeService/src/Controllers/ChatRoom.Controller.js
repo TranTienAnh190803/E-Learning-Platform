@@ -3,6 +3,7 @@ import { getIO } from "../Config/socket.js";
 import { ChatRoom } from "../Models/ChatRoom.Model.js";
 import { Member } from "../Models/MemberSchema.Model.js";
 import { Message } from "../Models/Message.Model.js";
+import { Participation } from "../Models/Participation.Model.js";
 
 export const createChatRoom = async (req, res) => {
   const { courseId, title, email, fullname, userId } = req.body;
@@ -13,6 +14,7 @@ export const createChatRoom = async (req, res) => {
 
     // Member đã tồn tại chưa (đã tồn tại -> tạo phòng; chưa tồn tại -> tạo member + tạo phòng)
     if (!member) {
+      // Member
       const newMember = {
         userId: userId,
         fullname: fullname,
@@ -20,19 +22,34 @@ export const createChatRoom = async (req, res) => {
       };
       const addedMember = await Member.create(newMember);
 
+      // ChatRoom
       const chatRoom = {
         courseId: courseId,
         roomName: title,
-        member: [addedMember._id],
       };
-      await ChatRoom.create(chatRoom);
+      const addedRoom = await ChatRoom.create(chatRoom);
+
+      // Participation
+      const participation = {
+        member: addedMember._id,
+        chatRoom: addedRoom._id,
+      };
+      await Participation.create(participation);
     } else {
+      // ChatRoom
       const chatRoom = {
         courseId: courseId,
         roomName: title,
         member: [member._id],
       };
-      await ChatRoom.create(chatRoom);
+      const addedRoom = await ChatRoom.create(chatRoom);
+
+      // Participation
+      const participation = {
+        member: member._id,
+        chatRoom: addedRoom._id,
+      };
+      await Participation.create(participation);
     }
 
     // ChatRoom Socket
@@ -78,10 +95,11 @@ export const joinChatRoom = async (req, res) => {
       member = await Member.create(newMember);
     }
 
-    await ChatRoom.updateOne(
-      { courseId: courseId },
-      { $addToSet: { member: member._id } },
-    );
+    const participation = {
+      member: member._id,
+      chatRoom: chatRoom._id,
+    };
+    await Participation.create(participation);
 
     // ChatRoom Socket
     io.join(`chat-room:${courseId}`);
@@ -122,10 +140,10 @@ export const leaveChatRoom = async (req, res) => {
       });
     }
 
-    await ChatRoom.updateOne(
-      { courseId: courseId },
-      { $pull: { member: member._id } },
-    );
+    await Participation.deleteMany({
+      member: member._id,
+      chatRoom: chatRoom._id,
+    });
 
     return res.status(200).json({
       success: true,
@@ -144,10 +162,10 @@ export const deleteChatRoom = async (req, res) => {
   const { courseId } = req.params;
 
   try {
-    const deletedChatRoom = await ChatRoom.findOneAndDelete({
-      courseId: courseId,
-    });
-    if (deletedChatRoom) {
+    const chatRoom = await ChatRoom.findOne({ courseId: courseId });
+    if (chatRoom) {
+      await ChatRoom.deleteOne(chatRoom);
+
       return res.status(200).json({
         success: true,
         message: "Deleted chat room successfully.",
@@ -196,18 +214,40 @@ export const getMemberId = async (req, res) => {
 };
 
 export const getParticipatedChatRoom = async (req, res) => {
-  const { memberId } = req.params;
+  const { userId } = req.user;
 
   try {
-    const chatRooms = await ChatRoom.find({
-      member: new mongoose.Types.ObjectId(memberId),
-    })
-      .select("-member -__v")
+    const member = await Member.findOne({ userId: userId });
+    if (!member)
+      return res.status(404).json({
+        success: false,
+        message: "Member not found.",
+        statusCode: 404,
+      });
+
+    // ChatRoom
+    const participation = await Participation.find({
+      member: member._id,
+    }).lean();
+    const chatRoomId = participation.map((value) => value.chatRoom);
+    const chatRooms = await ChatRoom.find({ _id: { $in: chatRoomId } })
+      .select("-__v")
       .lean();
     if (chatRooms && chatRooms.length > 0) {
+      const mapParticipate = new Map(
+        participation.map((x) => [x.chatRoom.toString(), x.isRead]),
+      );
+      // Result = [{ _id, courseId, roomName, isRead }]
+      const result = chatRooms
+        .map((x) => ({
+          ...x,
+          isRead: Boolean(mapParticipate.get(x._id.toString())),
+        }))
+        .sort((a, b) => a.isRead - b.isRead);
+
       return res.status(200).json({
         success: true,
-        data: chatRooms,
+        data: result,
         statusCode: 200,
       });
     }
@@ -240,7 +280,7 @@ export const getChat = async (req, res) => {
     if (chat.length > 0)
       return res.status(200).json({
         success: true,
-        data: notification,
+        data: chat,
         statusCode: 200,
       });
 

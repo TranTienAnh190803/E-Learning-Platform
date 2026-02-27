@@ -21,7 +21,7 @@ route.delete(
   deleteChatRoom,
 ); // CoreService call (delete course)
 route.get("/get-member-id", getMemberId);
-route.get("/get-participated-chat-room/:memberId", getParticipatedChatRoom);
+route.get("/get-participated-chat-room", getParticipatedChatRoom);
 route.get("/get-chat/:chatRoomId", getChat);
 
 export default route;
