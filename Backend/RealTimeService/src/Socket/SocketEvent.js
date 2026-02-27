@@ -2,6 +2,8 @@ import {
   getAllEnrolledCourseId,
   getAllOwnedCourseId,
 } from "../API/CoreService.js";
+import { Member } from "../Models/MemberSchema.Model.js";
+import { Participation } from "../Models/Participation.Model.js";
 
 export const socketEventHandler = (io) => {
   io.on("connection", async (socket) => {
@@ -12,7 +14,7 @@ export const socketEventHandler = (io) => {
       // Join all connection with same user
       socket.join(`user:${userId}`);
 
-      // Join all connection of 'course' with same user (Call API getAllCourse from CoreService)
+      // Join all connection of 'course' with same user (Call API getAllCourse from CoreService) - for notification
       if (role === "INSTRUCTOR") {
         const response = await getAllOwnedCourseId(token);
         if (response.success) {
@@ -29,9 +31,25 @@ export const socketEventHandler = (io) => {
         }
       }
 
+      // Join all connection for chat room
+      // const member = await Member.findOne({ userId: userId });
+      // if (member) {
+      //   const participatedChatRoom = await Participation.find({
+      //     member: member._id,
+      //   });
+      //   const chatRoom = participatedChatRoom.map((x) => x.chatRoom.toString());
+      //   chatRoom.forEach((value) => {
+      //     socket.join(`chat:${value}`);
+      //   });
+      // }
+
+      socket.on("join-room", (room) => {
+        socket.join(room);
+      });
+
       console.log(`✅ Socket Connected`);
     } catch (error) {
-      console.error("Connection error:", err);
+      console.error("Connection error:", error);
       socket.disconnect();
     }
   });

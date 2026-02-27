@@ -52,9 +52,6 @@ export const createChatRoom = async (req, res) => {
       await Participation.create(participation);
     }
 
-    // ChatRoom Socket
-    io.join(`chat-room:${courseId}`);
-
     return res.status(200).json({
       success: true,
       message: "Create chat room successfully",
@@ -100,9 +97,6 @@ export const joinChatRoom = async (req, res) => {
       chatRoom: chatRoom._id,
     };
     await Participation.create(participation);
-
-    // ChatRoom Socket
-    io.join(`chat-room:${courseId}`);
 
     return res.status(200).json({
       success: true,
@@ -274,7 +268,7 @@ export const getChat = async (req, res) => {
       chatRoom: new mongoose.Types.ObjectId(chatRoomId),
     })
       .select("-__v")
-      .sort({ sendAt: -1 })
+      .sort({ sendAt: 1 })
       .lean();
 
     if (chat.length > 0)
@@ -287,6 +281,46 @@ export const getChat = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: [],
+      statusCode: 200,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      statusCode: 500,
+    });
+  }
+};
+
+export const sendMessage = async (req, res) => {
+  const { userId } = req.user;
+  const { chatRoom, content } = req.params;
+
+  try {
+    const io = getIO();
+
+    const member = await Member.findOne({ userId: userId });
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+        statusCode: 404,
+      });
+    }
+
+    const message = {
+      sender: new mongoose.Types.ObjectId(member._id),
+      fullname: member.fullname,
+      chatRoom: new mongoose.Types.ObjectId(chatRoom),
+      content: content,
+      sendAt: new Date(),
+    };
+
+    await Message.create(message);
+    io.to(`chat:${chatRoom}`).emit("send-message", message);
+
+    return res.status(200).json({
+      success: true,
       statusCode: 200,
     });
   } catch (error) {

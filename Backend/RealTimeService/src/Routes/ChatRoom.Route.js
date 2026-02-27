@@ -7,6 +7,7 @@ import {
   getParticipatedChatRoom,
   joinChatRoom,
   leaveChatRoom,
+  sendMessage,
 } from "../Controllers/ChatRoom.Controller.js";
 import { authorization } from "../Middlewares/JWTAuthorization.js";
 
@@ -23,5 +24,6 @@ route.delete(
 route.get("/get-member-id", getMemberId);
 route.get("/get-participated-chat-room", getParticipatedChatRoom);
 route.get("/get-chat/:chatRoomId", getChat);
+route.post("/send-message/:chatRoom/:content", sendMessage);
 
 export default route;

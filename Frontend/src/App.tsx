@@ -19,6 +19,7 @@ import ProcessTrackingPage from "./Pages/ProcessTrackingPage";
 import CoursePreviewPage from "./Pages/CoursePreviewPage";
 import StudentCoursePage from "./Pages/StudentCoursePage";
 import LessonPage from "./Pages/LessonPage";
+import ChatPage from "./Pages/ChatPage";
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth);
@@ -89,6 +90,7 @@ function App() {
                   path="/course/:courseId/lesson/:lessonId"
                   element={<LessonPage />}
                 />
+                <Route path="/chat-room" element={<ChatPage />} />
               </>
             )}
         </Routes>

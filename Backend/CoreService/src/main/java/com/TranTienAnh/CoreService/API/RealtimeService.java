@@ -95,7 +95,7 @@ public class RealtimeService {
     }
 
     public Response<Void> deleteChatRoom(String token, Long courseId) {
-        return webClient.post()
+        return webClient.delete()
                 .uri(realtimeUrl + "/chat-room-api/delete-chat-room/" + courseId)
                 .headers(headers -> headers.setBearerAuth(token))
                 .exchangeToMono(response -> {

@@ -166,9 +166,13 @@ export default function Navbar() {
               </div>
             )}
           </div>
-          <div className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer">
+          <Link
+            to={"/chat-room"}
+            target="_blank"
+            className="text-2xl p-3 rounded-full bg-gray-800 mr-3 hover:bg-gray-900 hover:text-gray-300 cursor-pointer"
+          >
             <LuMessageCircleMore />
-          </div>
+          </Link>
           <div className="relative">
             <div
               className="px-3 py-2 flex items-center rounded-4xl bg-gray-800 hover:bg-gray-900 hover:text-gray-300 cursor-pointer select-none"
