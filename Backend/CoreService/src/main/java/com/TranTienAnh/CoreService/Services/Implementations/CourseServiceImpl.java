@@ -51,6 +51,9 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private LessonRepository lessonRepository;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
@@ -206,7 +209,7 @@ public class CourseServiceImpl implements CourseService {
         if (!chatRoomResponse.isSuccess())
             throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
-        // Push Notification (Call API pushNotification - pushNotification is main job)
+        // Push Notification (Send message by using Kafka)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
                 .stream()
                 .map(e -> e.getStudent().getId())
@@ -219,9 +222,10 @@ public class CourseServiceImpl implements CourseService {
                 null,
                 allStudent
         );
-        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
-        if (!notificationResponse.isSuccess())
-            throw new CustomBadRequestException(notificationResponse.getMessage());
+//        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+//        if (!notificationResponse.isSuccess())
+//            throw new CustomBadRequestException(notificationResponse.getMessage());
+        kafkaProducerService.sendNotificationPushingEvent(courseId.toString(), notificationForm);
 
         response.setSuccess(true);
         response.setStatusCode(200);

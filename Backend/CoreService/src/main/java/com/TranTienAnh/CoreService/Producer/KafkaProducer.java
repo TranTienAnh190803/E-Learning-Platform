@@ -14,10 +14,7 @@ public class KafkaProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${kafka.topic.name}")
-    private String topicName;
-
-    public void sendMessage(String key, Object event) {
+    public void sendMessage(String topicName, String key, Object event) {
         String message = objectMapper.writeValueAsString(event);
         kafkaTemplate.send(topicName, key, message);
     }

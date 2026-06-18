@@ -45,6 +45,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private LearningProcessRepository learningProcessRepository;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     @Override
     @PreAuthorize("hasAnyAuthority('STUDENT')")
     public Response<Void> enrollCourse(Long courseId, String password, String email, String token) {
@@ -76,7 +79,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if (!chatRoomResponse.isSuccess())
             throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
-        // Gửi thông báo đến giảng viên (gọi API pushNotification - pushNotification là side job)
+        // Gửi thông báo đến giảng viên (gửi message tới broker bằng Kafka)
         List<Long> instructorId = List.of(course.getInstructor().getId());
         NotificationForm notificationForm = new NotificationForm(
                 courseId,
@@ -86,7 +89,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 courseId.toString(),
                 instructorId
         );
-        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+//        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+        kafkaProducerService.sendNotificationPushingEvent(user.getId().toString(), notificationForm);
 
         response.setSuccess(true);
         response.setStatusCode(200);

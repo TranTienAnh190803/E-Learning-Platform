@@ -49,6 +49,9 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private RealtimeService realtimeService;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
@@ -69,7 +72,7 @@ public class LessonServiceImpl implements LessonService {
         course.setStatus(CourseStatus.Update);
         courseRepository.save(course);
 
-        // Push Notification to All Student (Call API pushNotification from RealtimeService)
+        // Push Notification to All Student (Send message)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
                 .stream()
                 .map(e -> e.getStudent().getId())
@@ -82,9 +85,10 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getId().toString(),
                 allStudent
         );
-        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
-        if (!notificationResponse.isSuccess())
-            throw new CustomBadRequestException(notificationResponse.getMessage());
+//        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+//        if (!notificationResponse.isSuccess())
+//            throw new CustomBadRequestException(notificationResponse.getMessage());
+        kafkaProducerService.sendNotificationPushingEvent(courseId.toString(), notificationForm);
 
         // Save Video
         String videoUrl = null;

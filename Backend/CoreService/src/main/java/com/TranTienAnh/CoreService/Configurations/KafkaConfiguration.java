@@ -8,13 +8,14 @@ import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
 public class KafkaConfiguration {
-    @Value("${kafka.topic.name}")
-    private String topicName;
+    @Value("${kafka.topic.notification}")
+    private String notificationPushingTopic;
 
     // Create Topic
     @Bean
     public NewTopic topic() {
-        return TopicBuilder.name(topicName)
+        return TopicBuilder.name(notificationPushingTopic)
+                .partitions(3)
                 .build();
     }
 }
