@@ -11,6 +11,7 @@ import MessageInput from "../Components/MessageInput.Chat";
 import { getSocket } from "../Configurations/Socket";
 
 export default function ChatPage() {
+  document.title = "Chat Room";
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
