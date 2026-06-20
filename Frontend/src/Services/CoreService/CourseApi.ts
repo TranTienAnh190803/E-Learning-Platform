@@ -36,7 +36,7 @@ export const updateCourse = async (courseId: number, courseForm: FormData): Prom
 }
 
 export const deleteCourse = async (courseId: number): Promise<ApiResponse<void>> => {
-    const response = await axios.delete(`/course-apidelete-course/${courseId}`);
+    const response = await axios.delete(`/course-api/delete-course/${courseId}`);
     return response.data;
 }
 

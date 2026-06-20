@@ -1,5 +1,6 @@
 package com.TranTienAnh.CoreService.Producer;
 
+import com.TranTienAnh.CoreService.Forms.Events;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -14,7 +15,7 @@ public class KafkaProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendMessage(String topicName, String key, Object event) {
+    public void sendMessage(String topicName, String key, Events<?> event) {
         String message = objectMapper.writeValueAsString(event);
         kafkaTemplate.send(topicName, key, message);
     }

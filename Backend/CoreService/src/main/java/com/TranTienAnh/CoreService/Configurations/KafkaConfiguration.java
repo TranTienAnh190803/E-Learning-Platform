@@ -11,10 +11,21 @@ public class KafkaConfiguration {
     @Value("${kafka.topic.notification}")
     private String notificationPushingTopic;
 
-    // Create Topic
+    @Value("${kafka.topic.chat}")
+    private String chatTopic;
+
+    // Create Topic for notification
     @Bean
-    public NewTopic topic() {
+    public NewTopic notificationTopic() {
         return TopicBuilder.name(notificationPushingTopic)
+                .partitions(3)
+                .build();
+    }
+
+    // Create Topic for Chat Room
+    @Bean
+    public NewTopic chatRoomTopic() {
+        return TopicBuilder.name(chatTopic)
                 .partitions(3)
                 .build();
     }

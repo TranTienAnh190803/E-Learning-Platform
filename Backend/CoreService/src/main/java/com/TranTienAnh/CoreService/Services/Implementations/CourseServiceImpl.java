@@ -10,6 +10,7 @@ import com.TranTienAnh.CoreService.Forms.*;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
+import com.TranTienAnh.CoreService.Models.Enums.EventsName;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
@@ -18,6 +19,7 @@ import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,12 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private KafkaProducerService kafkaProducerService;
 
+    @Value("${kafka.topic.notification}")
+    private String notificationTopic;
+
+    @Value("${kafka.topic.chat}")
+    private String chatTopic;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
@@ -88,18 +96,6 @@ public class CourseServiceImpl implements CourseService {
         );
         var newLesson = lessonRepository.save(lesson);
 
-        // Create Chat Room
-        ChatRoomCreateForm chatRoomForm = new ChatRoomCreateForm(
-                newCourse.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getId(),
-                newCourse.getTitle()
-        );
-        var chatRoomResponse = realtimeService.createChatRoom(token, chatRoomForm);
-        if (!chatRoomResponse.isSuccess())
-            throw new CustomBadRequestException(chatRoomResponse.getMessage());
-
         // Save File
         // Image (Course)
         String image = null;
@@ -115,6 +111,23 @@ public class CourseServiceImpl implements CourseService {
             newLesson.setContentUrl(videoUrl);
             lessonRepository.save(newLesson);
         }
+
+        // Create Chat Room
+        ChatRoomCreateForm chatRoomForm = new ChatRoomCreateForm(
+                newCourse.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getId(),
+                newCourse.getTitle()
+        );
+        Events<ChatRoomCreateForm> event = new Events<>(
+                EventsName.CREATE_CHATROOM.name(),
+                chatRoomForm
+        );
+//        var chatRoomResponse = realtimeService.createChatRoom(token, chatRoomForm);
+//        if (!chatRoomResponse.isSuccess())
+//            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+        kafkaProducerService.sendMessage(chatTopic, user.getId().toString(), event);
 
         response.setSuccess(true);
         response.setStatusCode(200);
@@ -222,10 +235,14 @@ public class CourseServiceImpl implements CourseService {
                 null,
                 allStudent
         );
+        Events<NotificationForm> events = new Events<>(
+                EventsName.NOTIFICATION_PUSH.name(),
+                notificationForm
+        );
 //        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
 //        if (!notificationResponse.isSuccess())
 //            throw new CustomBadRequestException(notificationResponse.getMessage());
-        kafkaProducerService.sendNotificationPushingEvent(courseId.toString(), notificationForm);
+        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
 
         response.setSuccess(true);
         response.setStatusCode(200);

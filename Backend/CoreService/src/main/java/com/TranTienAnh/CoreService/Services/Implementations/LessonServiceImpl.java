@@ -6,10 +6,12 @@ import com.TranTienAnh.CoreService.DTOs.LessonListDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
+import com.TranTienAnh.CoreService.Forms.Events;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
 import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
+import com.TranTienAnh.CoreService.Models.Enums.EventsName;
 import com.TranTienAnh.CoreService.Models.Enums.LessonType;
 import com.TranTienAnh.CoreService.Models.Enums.Role;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
@@ -19,6 +21,7 @@ import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import com.TranTienAnh.CoreService.Services.Interfaces.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +54,9 @@ public class LessonServiceImpl implements LessonService {
 
     @Autowired
     private KafkaProducerService kafkaProducerService;
+
+    @Value("${kafka.topic.notification}")
+    private String notificationTopic;
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
@@ -85,10 +91,14 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getId().toString(),
                 allStudent
         );
+        Events<NotificationForm> events = new Events<>(
+                EventsName.NOTIFICATION_PUSH.name(),
+                notificationForm
+        );
 //        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
 //        if (!notificationResponse.isSuccess())
 //            throw new CustomBadRequestException(notificationResponse.getMessage());
-        kafkaProducerService.sendNotificationPushingEvent(courseId.toString(), notificationForm);
+        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
 
         // Save Video
         String videoUrl = null;

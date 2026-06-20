@@ -1,5 +1,7 @@
 import { Kafka } from "kafkajs";
 import { notificationPushingHandler } from "./Handlers/NotificationPushingHandler.js";
+import { chatRoomCreationHandler } from "./Handlers/ChatRoomCreationHandler.js";
+import { chatRoomJoiningHandler } from "./Handlers/ChatRoomJoiningHandler.js";
 
 const kafka = new Kafka({
     clientId: "multi-consumer",
@@ -10,10 +12,16 @@ const consumer = kafka.consumer({groupId: "realtime-group"});
 
 const notificationTopic = process.env.KAFKA_NOTIFICATION_TOPIC || "notification_push";
 
-// key = topic
+// Kafka topic
+const topics = ["notification_topic", "chat_topic"];
+
+// Events registration
+// key = event name
 // value = event handler
 const handlers = {
-    notification_push: notificationPushingHandler
+    NOTIFICATION_PUSH: notificationPushingHandler,
+    CREATE_CHATROOM: chatRoomCreationHandler,
+    JOIN_CHATROOM: chatRoomJoiningHandler,
 };
 
 const run = async () => {
@@ -22,7 +30,7 @@ const run = async () => {
         console.log("✅ [KAFKA] Connected");
 
         // subscribe topic
-        for (const topic of Object.keys(handlers)) {
+        for (const topic of topics) {
             if (!topic || topic === "undefined") {
                 console.error(`❌ [KAFKA] topic ${topic} haven't set yet`);
             }
@@ -33,24 +41,26 @@ const run = async () => {
         // consumer
         await consumer.run({
             eachMessage: async ({topic, partition, message}) => {
-                console.log(`\n📬 [KAFKA] Recieved message from topic: "${topic}" (partition ${partition})`);
-                
-                if (!message.value) {
-                    console.warn("⚠️  [KAFKA] Message empty");
-                    return;
-                }
-
-                // Raw message
-                const value = message.value.toString();
-
                 try {
+                    console.log(`\n📬 [KAFKA] Recieved message from topic: "${topic}" (partition ${partition})`);
+                
+                    if (!message.value) {
+                        throw new Error("Message empty");
+                    }
+
+                    // Raw message
+                    const value = message.value.toString();
                     // Parsed message (JSON)
                     const data = JSON.parse(value);
 
+                    if (!data.eventName || !data.message) {
+                        throw new Error(`Inappropriate data, data: ${data}`);
+                    }
+
                     // Handle corresponding event with related message
-                    const handler = handlers[topic];
+                    const handler = handlers[data.eventName];
                     if (handler) {
-                        await handler(data);
+                        await handler(data.message);
                     } else {
                         console.warn(`⚠️  [KAFKA] No handler for topic: "${topic}"`);
                         console.warn(`   → Available handlers:`, Object.keys(handlers));

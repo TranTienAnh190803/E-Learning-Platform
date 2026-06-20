@@ -7,13 +7,16 @@ import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.ChatRoomForm;
 import com.TranTienAnh.CoreService.Forms.ChatRoomLeavingForm;
+import com.TranTienAnh.CoreService.Forms.Events;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Enrollment;
 import com.TranTienAnh.CoreService.Models.Entities.LearningProcess;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
+import com.TranTienAnh.CoreService.Models.Enums.EventsName;
 import com.TranTienAnh.CoreService.Repositories.*;
 import com.TranTienAnh.CoreService.Services.Interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,6 +51,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private KafkaProducerService kafkaProducerService;
 
+    @Value("${kafka.topic.notification}")
+    private String notificationTopic;
+
     @Override
     @PreAuthorize("hasAnyAuthority('STUDENT')")
     public Response<Void> enrollCourse(Long courseId, String password, String email, String token) {
@@ -75,9 +81,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 user.getFullName(),
                 user.getId()
         );
-        var chatRoomResponse = realtimeService.joinChatRoom(token, chatRoomForm);
-        if (!chatRoomResponse.isSuccess())
-            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+//        var chatRoomResponse = realtimeService.joinChatRoom(token, chatRoomForm);
+//        if (!chatRoomResponse.isSuccess())
+//            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+        Events<ChatRoomForm> event1 = new Events<>(
+                EventsName.JOIN_CHATROOM.name(),
+                chatRoomForm
+        );
+        kafkaProducerService.sendMessage(notificationTopic, user.getId().toString(), event1);
 
         // Gửi thông báo đến giảng viên (gửi message tới broker bằng Kafka)
         List<Long> instructorId = List.of(course.getInstructor().getId());
@@ -89,8 +100,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 courseId.toString(),
                 instructorId
         );
+        Events<NotificationForm> event2 = new Events<>(
+                EventsName.NOTIFICATION_PUSH.name(),
+                notificationForm
+        );
 //        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
-        kafkaProducerService.sendNotificationPushingEvent(user.getId().toString(), notificationForm);
+        kafkaProducerService.sendMessage(notificationTopic, user.getId().toString(), event2);
 
         response.setSuccess(true);
         response.setStatusCode(200);

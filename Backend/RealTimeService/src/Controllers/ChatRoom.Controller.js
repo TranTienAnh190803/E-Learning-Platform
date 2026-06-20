@@ -5,112 +5,112 @@ import { Member } from "../Models/MemberSchema.Model.js";
 import { Message } from "../Models/Message.Model.js";
 import { Participation } from "../Models/Participation.Model.js";
 
-export const createChatRoom = async (req, res) => {
-  const { courseId, title, email, fullname, userId } = req.body;
+// export const createChatRoom = async (req, res) => {
+//   const { courseId, title, email, fullname, userId } = req.body;
 
-  try {
-    const io = getIO();
-    const member = await Member.findOne({ userId: userId });
+//   try {
+//     const io = getIO();
+//     const member = await Member.findOne({ userId: userId });
 
-    // Member đã tồn tại chưa (đã tồn tại -> tạo phòng; chưa tồn tại -> tạo member + tạo phòng)
-    if (!member) {
-      // Member
-      const newMember = {
-        userId: userId,
-        fullname: fullname,
-        email: email,
-      };
-      const addedMember = await Member.create(newMember);
+//     // Member đã tồn tại chưa (đã tồn tại -> tạo phòng; chưa tồn tại -> tạo member + tạo phòng)
+//     if (!member) {
+//       // Member
+//       const newMember = {
+//         userId: userId,
+//         fullname: fullname,
+//         email: email,
+//       };
+//       const addedMember = await Member.create(newMember);
 
-      // ChatRoom
-      const chatRoom = {
-        courseId: courseId,
-        roomName: title,
-      };
-      const addedRoom = await ChatRoom.create(chatRoom);
+//       // ChatRoom
+//       const chatRoom = {
+//         courseId: courseId,
+//         roomName: title,
+//       };
+//       const addedRoom = await ChatRoom.create(chatRoom);
 
-      // Participation
-      const participation = {
-        member: addedMember._id,
-        chatRoom: addedRoom._id,
-      };
-      await Participation.create(participation);
-    } else {
-      // ChatRoom
-      const chatRoom = {
-        courseId: courseId,
-        roomName: title,
-        member: [member._id],
-      };
-      const addedRoom = await ChatRoom.create(chatRoom);
+//       // Participation
+//       const participation = {
+//         member: addedMember._id,
+//         chatRoom: addedRoom._id,
+//       };
+//       await Participation.create(participation);
+//     } else {
+//       // ChatRoom
+//       const chatRoom = {
+//         courseId: courseId,
+//         roomName: title,
+//         member: [member._id],
+//       };
+//       const addedRoom = await ChatRoom.create(chatRoom);
 
-      // Participation
-      const participation = {
-        member: member._id,
-        chatRoom: addedRoom._id,
-      };
-      await Participation.create(participation);
-    }
+//       // Participation
+//       const participation = {
+//         member: member._id,
+//         chatRoom: addedRoom._id,
+//       };
+//       await Participation.create(participation);
+//     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Create chat room successfully",
-      statusCode: 200,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      statusCode: 500,
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Create chat room successfully",
+//       statusCode: 200,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//       statusCode: 500,
+//     });
+//   }
+// };
 
-export const joinChatRoom = async (req, res) => {
-  const { courseId, email, fullname, userId } = req.body;
+// export const joinChatRoom = async (req, res) => {
+//   const { courseId, email, fullname, userId } = req.body;
 
-  try {
-    const io = getIO();
+//   try {
+//     const io = getIO();
 
-    const chatRoom = await ChatRoom.findOne({ courseId: courseId });
-    if (!chatRoom) {
-      return res.status(400).json({
-        success: false,
-        message: "Chat room does not exist",
-        statusCode: 400,
-      });
-    }
+//     const chatRoom = await ChatRoom.findOne({ courseId: courseId });
+//     if (!chatRoom) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Chat room does not exist",
+//         statusCode: 400,
+//       });
+//     }
 
-    let member = await Member.findOne({ userId: userId });
-    // Member đã tồn tại chưa (đã tồn tại -> vào phòng chat; chưa tồn tại -> tạo member + vào phòng chat luôn)
-    if (!member) {
-      const newMember = {
-        userId: userId,
-        fullname: fullname,
-        email: email,
-      };
-      member = await Member.create(newMember);
-    }
+//     let member = await Member.findOne({ userId: userId });
+//     // Member đã tồn tại chưa (đã tồn tại -> vào phòng chat; chưa tồn tại -> tạo member + vào phòng chat luôn)
+//     if (!member) {
+//       const newMember = {
+//         userId: userId,
+//         fullname: fullname,
+//         email: email,
+//       };
+//       member = await Member.create(newMember);
+//     }
 
-    const participation = {
-      member: member._id,
-      chatRoom: chatRoom._id,
-    };
-    await Participation.create(participation);
+//     const participation = {
+//       member: member._id,
+//       chatRoom: chatRoom._id,
+//     };
+//     await Participation.create(participation);
 
-    return res.status(200).json({
-      success: true,
-      message: "Join chat room successfully",
-      statusCode: 200,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      statusCode: 500,
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Join chat room successfully",
+//       statusCode: 200,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//       statusCode: 500,
+//     });
+//   }
+// };
 
 export const leaveChatRoom = async (req, res) => {
   const { courseId, userId } = req.body;
