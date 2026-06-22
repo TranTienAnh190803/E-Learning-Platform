@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.API.RealtimeService;
+import com.TranTienAnh.CoreService.DTOs.CloudinaryResponseDto;
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
 import com.TranTienAnh.CoreService.DTOs.LessonListDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
@@ -10,10 +11,7 @@ import com.TranTienAnh.CoreService.Forms.Events;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
-import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
-import com.TranTienAnh.CoreService.Models.Enums.EventsName;
-import com.TranTienAnh.CoreService.Models.Enums.LessonType;
-import com.TranTienAnh.CoreService.Models.Enums.Role;
+import com.TranTienAnh.CoreService.Models.Enums.*;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.LessonRepository;
@@ -54,6 +52,9 @@ public class LessonServiceImpl implements LessonService {
 
     @Autowired
     private KafkaProducerService kafkaProducerService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Value("${kafka.topic.notification}")
     private String notificationTopic;
@@ -101,10 +102,15 @@ public class LessonServiceImpl implements LessonService {
         kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
 
         // Save Video
-        String videoUrl = null;
         if (lessonForm.getVideoFile() != null) {
-            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
-            newLesson.setContentUrl(videoUrl);
+//            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
+            CloudinaryResponseDto result = cloudinaryService.uploadFile(
+                    lessonForm.getVideoFile(),
+                    CloudFolder.lessons.name(),
+                    FileType.video.name(),
+                    newLesson.getId().toString()
+            );
+            newLesson.setContentUrl(result.getContentUrl());
             lessonRepository.save(newLesson);
         }
 
@@ -186,8 +192,14 @@ public class LessonServiceImpl implements LessonService {
             lesson.setContentUrl(null);
         }
         if (lessonForm.getLessonType() == LessonType.STUDY && lessonForm.getVideoFile() != null) {
-            String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
-            lesson.setContentUrl(url);
+//            String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
+            CloudinaryResponseDto cloudinaryResponseDto = cloudinaryService.uploadFile(
+                    lessonForm.getVideoFile(),
+                    CloudFolder.lessons.name(),
+                    FileType.video.name(),
+                    lesson.getId().toString()
+            );
+            lesson.setContentUrl(cloudinaryResponseDto.getContentUrl());
         }
         lesson.setTitle(lessonForm.getTitle());
         lesson.setContent(lessonForm.getContent());

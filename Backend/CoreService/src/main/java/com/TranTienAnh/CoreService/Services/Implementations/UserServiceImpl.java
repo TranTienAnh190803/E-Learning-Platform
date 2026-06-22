@@ -1,5 +1,6 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
+import com.TranTienAnh.CoreService.DTOs.CloudinaryResponseDto;
 import com.TranTienAnh.CoreService.DTOs.JwtResponseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.DTOs.UserDto;
@@ -11,9 +12,7 @@ import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Entities.User;
 import com.TranTienAnh.CoreService.Models.Entities.UserOtp;
-import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
-import com.TranTienAnh.CoreService.Models.Enums.OtpPurpose;
-import com.TranTienAnh.CoreService.Models.Enums.Role;
+import com.TranTienAnh.CoreService.Models.Enums.*;
 import com.TranTienAnh.CoreService.Repositories.UserOtpRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
@@ -61,6 +60,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -239,10 +241,6 @@ public class UserServiceImpl implements UserService {
                 response.setMessage("User information not found");
             }
             else {
-                String avatar = null;
-                if (user.getAvatarPath() != null && !user.getAvatarPath().isBlank())
-                    avatar = baseUrl + "/" + user.getAvatarPath();
-
                 UserDto userDto = new UserDto(
                         user.getId(),
                         user.getFullName(),
@@ -253,7 +251,7 @@ public class UserServiceImpl implements UserService {
                         user.getEmail(),
                         user.getStatus().name(),
                         user.getStatus().getValue(),
-                        avatar
+                        user.getAvatarPath()
                 );
 
                 response.setSuccess(true);
@@ -620,9 +618,15 @@ public class UserServiceImpl implements UserService {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
-        String path = fileService.saveImage(file, user.getId(), "avatar");
+//        String path = fileService.saveImage(file, user.getId(), "avatar");
+        CloudinaryResponseDto result = cloudinaryService.uploadFile(
+                file,
+                CloudFolder.avatars.name(),
+                FileType.image.name(),
+                user.getId().toString()
+        );
 
-        user.setAvatarPath(path);
+        user.setAvatarPath(result.getContentUrl());
         userRepository.save(user);
 
         response.setStatusCode(200);
