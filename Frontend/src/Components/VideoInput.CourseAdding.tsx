@@ -19,7 +19,7 @@ export default function VideoInput({ video, setVideo }: Props) {
     throw new Error("Must be used within Context");
   }
 
-  const { courseForm, setCourseForm, handleBackButton } = context;
+  const { courseForm, setCourseForm, handleBackButton, setLoading } = context;
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -60,6 +60,7 @@ export default function VideoInput({ video, setVideo }: Props) {
 
   const handleFinish = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const formData = objectToFormData(courseForm);
     const response = await addCourse(formData);
@@ -67,15 +68,16 @@ export default function VideoInput({ video, setVideo }: Props) {
     if (response.success) {
       navigate("/my-course");
     }
+
+    setLoading(false);
   };
 
   return (
     <form className="min-h-[455px]" onSubmit={handleFinish}>
       <div
         {...getRootProps()}
-        className={`my-8 h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 hover:text-blue-500 ${
-          isDragActive ? "bg-blue-100 border-blue-500" : "border-gray-400"
-        }`}
+        className={`my-8 h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 hover:text-blue-500 ${isDragActive ? "bg-blue-100 border-blue-500" : "border-gray-400"
+          }`}
       >
         <input {...getInputProps()} />
 

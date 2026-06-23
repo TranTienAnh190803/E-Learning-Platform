@@ -8,8 +8,6 @@ interface props {
   isProfilePage?: boolean;
 }
 
-const coreService = import.meta.env.VITE_CORE_SERVICE;
-
 export default function Card({ course, isProfilePage }: props) {
   const navigate = useNavigate();
 
@@ -46,7 +44,7 @@ export default function Card({ course, isProfilePage }: props) {
         <img
           src={
             course.imageUrl
-              ? `${coreService}/${course.imageUrl}`
+              ? course.imageUrl
               : "/assets/DefaultCourse.jpg"
           }
           className="block w-full h-full"
@@ -71,7 +69,7 @@ export default function Card({ course, isProfilePage }: props) {
             <img
               src={
                 course.instructorAvatar
-                  ? `${coreService}/${course.instructorAvatar}`
+                  ? course.instructorAvatar
                   : "/assets/User.jpg"
               }
               className="w-full aspect-square"

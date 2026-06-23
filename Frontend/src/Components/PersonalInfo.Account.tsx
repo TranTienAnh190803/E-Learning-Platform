@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, type SetStateAction } from "react";
 import { useAuthStore } from "../Hooks/AuthStore";
 import type { ProfileChangingForm } from "../Types/User.type";
 import {
@@ -6,7 +6,11 @@ import {
   changePersonalInfo,
 } from "../Services/CoreService/UserApi";
 
-export default function PersonalInfo() {
+interface Props {
+  setLoading: React.Dispatch<SetStateAction<boolean>>
+}
+
+export default function PersonalInfo({ setLoading }: Props) {
   // Global State
   const auth = useAuthStore((s) => s.auth);
   const logout = useAuthStore((s) => s.logout);
@@ -49,6 +53,8 @@ export default function PersonalInfo() {
 
   const handleChangeAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
+    setLoading(true);
+
     const file = e.target.files![0];
 
     const formData = new FormData();
@@ -60,6 +66,8 @@ export default function PersonalInfo() {
     } else {
       alert(response.message);
     }
+
+    setLoading(false);
   };
 
   return (

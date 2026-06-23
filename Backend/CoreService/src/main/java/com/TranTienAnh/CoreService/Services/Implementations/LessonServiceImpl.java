@@ -189,6 +189,11 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (lessonForm.getLessonType() == LessonType.WORK) {
+            if (lesson.getContentUrl() != null)
+                cloudinaryService.deleteFile(
+                        CloudFolder.lessons.name() + "/" + lesson.getId().toString(),
+                        FileType.video.name()
+                );
             lesson.setContentUrl(null);
         }
         if (lessonForm.getLessonType() == LessonType.STUDY && lessonForm.getVideoFile() != null) {
@@ -215,13 +220,20 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
-    public Response<Void> deleteLesson(Long lessonId, String email) {
+    public Response<Void> deleteLesson(Long lessonId, String email) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson not found."));
         if (!lesson.getCourse().getInstructor().equals(user)) {
             throw new CustomBadRequestException("This course is not belong to you.");
+        }
+
+        if (lesson.getContentUrl() != null) {
+            cloudinaryService.deleteFile(
+                    CloudFolder.lessons.name() + "/" + lesson.getId(),
+                    FileType.video.name()
+            );
         }
 
         lessonRepository.delete(lesson);

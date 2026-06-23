@@ -228,11 +228,23 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
-    public Response<Void> deleteCourse(String email, Long courseId, String token) {
+    public Response<Void> deleteCourse(String email, Long courseId, String token) throws IOException {
         Response<Void> response = new Response<>();
 
         var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        // Delete relevant file on Cloud
+        if (course.getImageUrl() != null) {
+            cloudinaryService.deleteFile(
+                    CloudFolder.courses.name() + "/" + course.getId().toString(),
+                    FileType.image.name()
+            );
+
+            List<Long> courseLessons = course.getLesson().stream().map(Lesson::getId).toList();
+            cloudinaryService.deleteListLessonFile(courseLessons);
+        }
+
         courseRepository.delete(course);
 
         // Delete chat room

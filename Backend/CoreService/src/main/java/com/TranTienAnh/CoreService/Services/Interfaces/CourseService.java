@@ -18,7 +18,7 @@ public interface CourseService {
 
     Response<Void> updateCourse(String email, Long courseId, CourseForm courseForm) throws IOException;
 
-    Response<Void> deleteCourse(String email, Long courseId, String token);
+    Response<Void> deleteCourse(String email, Long courseId, String token) throws IOException;
 
     Response<List<CourseDto>> getAllOwnedCourses(String email);
 

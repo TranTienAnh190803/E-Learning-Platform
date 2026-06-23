@@ -6,6 +6,7 @@ import type { LessonForm } from "../Types/Lesson.type";
 import { useNavigate, useParams } from "react-router-dom";
 import { addLesson } from "../Services/CoreService/LessonApi";
 import { objectToFormData } from "../Helper/Converter";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export default function LessonCreatePage() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function LessonCreatePage() {
     content: "",
     videoFile: null,
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -33,6 +35,7 @@ export default function LessonCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const formData: FormData = objectToFormData(form);
     const response = await addLesson(formData, Number(courseId));
@@ -40,10 +43,14 @@ export default function LessonCreatePage() {
     if (response.success) {
       navigate(`/course-detail/${courseId}`);
     }
+
+    setLoading(false);
   };
 
   return (
     <>
+      {loading && <LoadingScreen />}
+
       <Navbar />{" "}
       <div className="flex justify-center min-h-screen py-12 mt-25">
         <form

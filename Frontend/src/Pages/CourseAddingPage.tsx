@@ -8,6 +8,7 @@ import CourseAuthentication from "../Components/Authenticate.CourseAdding";
 import ImageInput from "../Components/ImageInput.CourseAdding";
 import FirstLesson from "../Components/FirstLesson.CourseAdding";
 import VideoInput from "../Components/VideoInput.CourseAdding";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export type CourseAddingContextType = {
   phaseNumber: number;
@@ -16,6 +17,7 @@ export type CourseAddingContextType = {
   setCourseForm: React.Dispatch<SetStateAction<CourseAddingForm>>;
   handleBackButton(): void;
   handleNextButton(e: React.FormEvent): void;
+  setLoading: React.Dispatch<SetStateAction<boolean>>;
 };
 
 export const CourseAddingContext = createContext<
@@ -40,6 +42,7 @@ export default function CourseAddingPage() {
 
   const [image, setImage] = useState<string | null>(null);
   const [video, setVideo] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleBackButton = () => {
     setPhaseNumber((prev) => prev - 1);
@@ -52,6 +55,7 @@ export default function CourseAddingPage() {
 
   return (
     <>
+      {loading && <LoadingScreen />}
       <Navbar />
       <CourseAddingContext.Provider
         value={{
@@ -61,6 +65,7 @@ export default function CourseAddingPage() {
           setCourseForm,
           handleBackButton,
           handleNextButton,
+          setLoading
         }}
       >
         <div className="min-h-screen mt-25 flex">

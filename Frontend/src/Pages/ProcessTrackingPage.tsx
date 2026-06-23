@@ -14,8 +14,7 @@ export default function ProcessTrackingPage() {
       const data: ProcessTracking[] = response.data!.map((value) => {
         let image: string | null = null;
         if (value.imageUrl) {
-          const coreService = import.meta.env.VITE_CORE_SERVICE;
-          image = `${coreService}/${value.imageUrl}`;
+          image = value.imageUrl;
         }
 
         return {

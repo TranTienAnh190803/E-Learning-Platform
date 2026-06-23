@@ -12,8 +12,6 @@ import { isInstructor } from "../Helper/CheckRole";
 import { FaCircle, FaSearch } from "react-icons/fa";
 import { IoIosMore } from "react-icons/io";
 
-const coreService = import.meta.env.VITE_CORE_SERVICE;
-
 export default function InstructorCoursePage() {
   // Global State
   const auth = useAuthStore((s) => s.auth);
@@ -95,7 +93,7 @@ export default function InstructorCoursePage() {
                         <img
                           src={
                             value.imageUrl
-                              ? `${coreService}/${value.imageUrl}`
+                              ? value.imageUrl
                               : "assets/DefaultCourse.jpg"
                           }
                           className="block w-[15%]"

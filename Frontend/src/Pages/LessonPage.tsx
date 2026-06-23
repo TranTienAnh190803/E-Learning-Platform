@@ -26,7 +26,6 @@ export default function LessonPage() {
   const fetchCurrentLesson = async () => {
     const response = await getLesson(Number(lessonId));
     if (response.success) {
-      const coreService = import.meta.env.VITE_CORE_SERVICE;
       const data = response.data!;
       setCurrentLesson({
         id: data.id,
@@ -35,7 +34,7 @@ export default function LessonPage() {
         lessonType: data.lessonType,
         content: data.content,
         contentUrl: data.contentUrl
-          ? `${coreService}/${data.contentUrl}`
+          ? data.contentUrl
           : null,
       });
     } else {
@@ -134,26 +133,24 @@ export default function LessonPage() {
                   key={lesson.id}
                   onClick={() => handleLessonClick(lesson.id)}
                   className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition text-sm
-            ${
-              isActive
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : isCompleted
-                  ? "bg-green-50 text-green-700"
-                  : "hover:bg-gray-100 text-gray-700"
-            }`}
+            ${isActive
+                      ? "bg-blue-100 text-blue-700 font-medium"
+                      : isCompleted
+                        ? "bg-green-50 text-green-700"
+                        : "hover:bg-gray-100 text-gray-700"
+                    }`}
                 >
                   {/* LEFT SIDE */}
                   <div className="flex items-center gap-3">
                     {/* Status Icon */}
                     <div
                       className={`w-5 h-5 flex items-center justify-center rounded-full border text-xs
-                ${
-                  isCompleted
-                    ? "bg-green-500 border-green-500 text-white"
-                    : isActive
-                      ? "border-blue-500 text-blue-500"
-                      : "border-gray-400 text-gray-400"
-                }`}
+                ${isCompleted
+                          ? "bg-green-500 border-green-500 text-white"
+                          : isActive
+                            ? "border-blue-500 text-blue-500"
+                            : "border-gray-400 text-gray-400"
+                        }`}
                     >
                       {isCompleted ? "✔" : ""}
                     </div>

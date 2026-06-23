@@ -6,18 +6,22 @@ import PersonalInfo from "../Components/PersonalInfo.Account";
 import PasswordChanging from "../Components/PasswordChanging.Account";
 import EmailChanging from "../Components/EmailChanging.Account";
 import AccountDeleting from "../Components/AccountDeleting.Account";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export type Selection = "personal" | "email" | "password" | "delete";
 
 export default function AccountPage() {
   const [selection, setSelection] = useState<Selection>("personal");
+  const [loading, setLoading] = useState<boolean>(false);
 
   return (
     <>
+      {loading && <LoadingScreen />}
+
       <Navbar />
       <div className="min-h-screen mt-25 flex">
         <Sidebar selection={selection} setSelection={setSelection} />
-        {selection === "personal" && <PersonalInfo />}
+        {selection === "personal" && <PersonalInfo setLoading={setLoading} />}
         {selection === "email" && <EmailChanging />}
         {selection === "password" && <PasswordChanging />}
         {selection === "delete" && <AccountDeleting />}
