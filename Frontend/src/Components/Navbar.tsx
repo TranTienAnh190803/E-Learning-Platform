@@ -130,7 +130,7 @@ export default function Navbar() {
               )}
             {openNotification && (
               <div
-                className="absolute right-0 top-15 min-w-[450px] min-h-[70vh] bg-white text-black rounded-2xl overflow-y-scroll scrollbar-hide shadow-xl/15"
+                className="absolute right-0 top-15 min-w-[450px] max-h-[70vh] overflow-y-scroll bg-white text-black rounded-2xl overflow-y-scroll scrollbar-hide shadow-xl/15"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="py-3 px-5 flex justify-between items-center border-b border-gray-200">

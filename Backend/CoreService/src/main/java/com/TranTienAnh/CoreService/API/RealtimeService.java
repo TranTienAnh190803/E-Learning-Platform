@@ -12,9 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class RealtimeService {
-    @Value("${realtime.url}")
-    private String realtimeUrl;
-
     @Autowired
     private WebClient webClient;
 
@@ -76,40 +73,40 @@ public class RealtimeService {
 //                .block();
 //    }
 
-    public Response<Void> leaveChatRoom(String token, ChatRoomLeavingForm chatRoomLeavingForm) {
-        return webClient.post()
-                .uri(realtimeUrl + "/chat-room-api/leave-chat-room")
-                .headers(headers -> headers.setBearerAuth(token))
-                .bodyValue(chatRoomLeavingForm)
-                .exchangeToMono(response -> {
-                    int statusCode = response.statusCode().value();
-                    if (statusCode == 200) {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(true, 200, " ", null));
-                    }
-                    else {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(false, 400, "Cannot leave chat room", null));
-                    }
-                })
-                .block();
-    }
+//    public Response<Void> leaveChatRoom(String token, ChatRoomLeavingForm chatRoomLeavingForm) {
+//        return webClient.post()
+//                .uri(realtimeUrl + "/chat-room-api/leave-chat-room")
+//                .headers(headers -> headers.setBearerAuth(token))
+//                .bodyValue(chatRoomLeavingForm)
+//                .exchangeToMono(response -> {
+//                    int statusCode = response.statusCode().value();
+//                    if (statusCode == 200) {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(true, 200, " ", null));
+//                    }
+//                    else {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(false, 400, "Cannot leave chat room", null));
+//                    }
+//                })
+//                .block();
+//    }
 
-    public Response<Void> deleteChatRoom(String token, Long courseId) {
-        return webClient.delete()
-                .uri(realtimeUrl + "/chat-room-api/delete-chat-room/" + courseId)
-                .headers(headers -> headers.setBearerAuth(token))
-                .exchangeToMono(response -> {
-                    int statusCode = response.statusCode().value();
-                    if (statusCode == 200) {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(true, 200, " ", null));
-                    }
-                    else {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(false, 400, "Cannot delete chat room", null));
-                    }
-                })
-                .block();
-    }
+//    public Response<Void> deleteChatRoom(String token, Long courseId) {
+//        return webClient.delete()
+//                .uri(realtimeUrl + "/chat-room-api/delete-chat-room/" + courseId)
+//                .headers(headers -> headers.setBearerAuth(token))
+//                .exchangeToMono(response -> {
+//                    int statusCode = response.statusCode().value();
+//                    if (statusCode == 200) {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(true, 200, " ", null));
+//                    }
+//                    else {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(false, 400, "Cannot delete chat room", null));
+//                    }
+//                })
+//                .block();
+//    }
 }

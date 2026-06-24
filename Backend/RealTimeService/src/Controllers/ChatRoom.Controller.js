@@ -112,74 +112,74 @@ import { Participation } from "../Models/Participation.Model.js";
 //   }
 // };
 
-export const leaveChatRoom = async (req, res) => {
-  const { courseId, userId } = req.body;
+// export const leaveChatRoom = async (req, res) => {
+//   const { courseId, userId } = req.body;
 
-  try {
-    const chatRoom = await ChatRoom.findOne({ courseId: courseId });
-    if (!chatRoom) {
-      return res.status(400).json({
-        success: false,
-        message: "Chat room does not exist",
-        statusCode: 400,
-      });
-    }
+//   try {
+//     const chatRoom = await ChatRoom.findOne({ courseId: courseId });
+//     if (!chatRoom) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Chat room does not exist",
+//         statusCode: 400,
+//       });
+//     }
 
-    const member = await Member.findOne({ userId: userId });
-    if (!member) {
-      return res.status(400).json({
-        success: false,
-        message: "Member not found",
-        statusCode: 400,
-      });
-    }
+//     const member = await Member.findOne({ userId: userId });
+//     if (!member) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Member not found",
+//         statusCode: 400,
+//       });
+//     }
 
-    await Participation.deleteMany({
-      member: member._id,
-      chatRoom: chatRoom._id,
-    });
+//     await Participation.deleteMany({
+//       member: member._id,
+//       chatRoom: chatRoom._id,
+//     });
 
-    return res.status(200).json({
-      success: true,
-      statusCode: 200,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      statusCode: 500,
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       statusCode: 200,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//       statusCode: 500,
+//     });
+//   }
+// };
 
-export const deleteChatRoom = async (req, res) => {
-  const { courseId } = req.params;
+// export const deleteChatRoom = async (req, res) => {
+//   const { courseId } = req.params;
 
-  try {
-    const chatRoom = await ChatRoom.findOne({ courseId: courseId });
-    if (chatRoom) {
-      await ChatRoom.deleteOne(chatRoom);
+//   try {
+//     const chatRoom = await ChatRoom.findOne({ courseId: courseId });
+//     if (chatRoom) {
+//       await ChatRoom.deleteOne(chatRoom);
 
-      return res.status(200).json({
-        success: true,
-        message: "Deleted chat room successfully.",
-        statusCode: 200,
-      });
-    }
+//       return res.status(200).json({
+//         success: true,
+//         message: "Deleted chat room successfully.",
+//         statusCode: 200,
+//       });
+//     }
 
-    return res.status(404).json({
-      success: false,
-      message: "Chat room not found.",
-      statusCode: 404,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      statusCode: 500,
-    });
-  }
-};
+//     return res.status(404).json({
+//       success: false,
+//       message: "Chat room not found.",
+//       statusCode: 404,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//       statusCode: 500,
+//     });
+//   }
+// };
 
 export const getMemberId = async (req, res) => {
   const { userId } = req.user;

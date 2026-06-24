@@ -248,9 +248,11 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.delete(course);
 
         // Delete chat room
-        var chatRoomResponse = realtimeService.deleteChatRoom(token, courseId);
-        if (!chatRoomResponse.isSuccess())
-            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+//        var chatRoomResponse = realtimeService.deleteChatRoom(token, courseId);
+//        if (!chatRoomResponse.isSuccess())
+//            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+        Events<Long> event1 = new Events<>(EventsName.DELETE_CHATROOM.name(), courseId);
+        kafkaProducerService.sendMessage(chatTopic, instructor.getId().toString(), event1);
 
         // Push Notification (Send message by using Kafka)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
@@ -265,14 +267,14 @@ public class CourseServiceImpl implements CourseService {
                 null,
                 allStudent
         );
-        Events<NotificationForm> events = new Events<>(
+        Events<NotificationForm> event2 = new Events<>(
                 EventsName.NOTIFICATION_PUSH.name(),
                 notificationForm
         );
 //        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
 //        if (!notificationResponse.isSuccess())
 //            throw new CustomBadRequestException(notificationResponse.getMessage());
-        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
+        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), event2);
 
         response.setSuccess(true);
         response.setStatusCode(200);
@@ -375,6 +377,10 @@ public class CourseServiceImpl implements CourseService {
 
         var enrollment = enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).orElseThrow(() -> new CustomNotFoundException("This student is not belong to this course."));
         enrollmentRepository.delete(enrollment);
+
+        ChatRoomLeavingForm chatRoomLeavingForm = new ChatRoomLeavingForm(courseId, studentId);
+        Events<ChatRoomLeavingForm> event = new Events<>(EventsName.LEAVE_CHATROOM.name(), chatRoomLeavingForm);
+        kafkaProducerService.sendMessage(chatTopic, instructor.getId().toString(), event);
 
         response.setSuccess(true);
         response.setStatusCode(200);

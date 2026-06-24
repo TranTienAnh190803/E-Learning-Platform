@@ -2,6 +2,8 @@ import { Kafka } from "kafkajs";
 import { notificationPushingHandler } from "./Handlers/NotificationPushingHandler.js";
 import { chatRoomCreationHandler } from "./Handlers/ChatRoomCreationHandler.js";
 import { chatRoomJoiningHandler } from "./Handlers/ChatRoomJoiningHandler.js";
+import { chatRoomLeavingHandler } from "./Handlers/ChatRoomLeavingHandler.js";
+import { chatRoomDeletingHandler } from "./Handlers/ChatRoomDeletingHandler.js";
 
 const kafka = new Kafka({
     clientId: "multi-consumer",
@@ -22,6 +24,8 @@ const handlers = {
     NOTIFICATION_PUSH: notificationPushingHandler,
     CREATE_CHATROOM: chatRoomCreationHandler,
     JOIN_CHATROOM: chatRoomJoiningHandler,
+    LEAVE_CHATROOM: chatRoomLeavingHandler,
+    DELETE_CHATROOM: chatRoomDeletingHandler,
 };
 
 const run = async () => {
@@ -60,6 +64,7 @@ const run = async () => {
                     // Handle corresponding event with related message
                     const handler = handlers[data.eventName];
                     if (handler) {
+                        console.log(data.message)
                         await handler(data.message);
                     } else {
                         console.warn(`⚠️  [KAFKA] No handler for topic: "${topic}"`);

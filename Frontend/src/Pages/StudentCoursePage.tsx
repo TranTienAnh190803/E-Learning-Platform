@@ -4,7 +4,7 @@ import Footer from "../Components/Footer";
 import { useEffect, useState } from "react";
 import type { LessonListData } from "../Types/Lesson.type";
 import { getAllLesson } from "../Services/CoreService/LessonApi";
-import { getCompletedLesson } from "../Services/CoreService/EnrollmentApi";
+import { getCompletedLesson, leaveCourse } from "../Services/CoreService/EnrollmentApi";
 
 export default function StudentCoursePage() {
   const { courseId } = useParams();
@@ -40,12 +40,30 @@ export default function StudentCoursePage() {
     window.location.reload();
   };
 
+  const handleLeaveCourse = async () => {
+    if (confirm("Are you sure you want to leave this course?")) {
+      const response = await leaveCourse(Number(courseId));
+      alert(response.message);
+      if (response.success)
+        navigate("/")
+    }
+  }
+
   return (
     <>
       <Navbar />
       <div className="flex justify-center min-h-screen py-10 mt-25">
         <div className="w-[70%] bg-white rounded-2xl shadow-md p-8 space-y-6">
-          <h1 className="text-2xl font-bold text-gray-800">Course Lessons</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Course Lessons</h1>
+            <button
+              className="px-3 py-1 rounded-2xl border border-red-500 text-red-500 hover:border-white hover:bg-red-500 hover:text-white cursor-pointer"
+              onClick={handleLeaveCourse}
+            >
+              Leave Course
+            </button>
+          </div>
+
 
           <div className="space-y-3">
             {lessons.map((lesson, index) => {
@@ -56,22 +74,20 @@ export default function StudentCoursePage() {
                   key={lesson.id}
                   onClick={() => handleClick(lesson.id)}
                   className={`flex items-center justify-between p-4 rounded-xl cursor-pointer transition border
-                  ${
-                    isCompleted
+                  ${isCompleted
                       ? "bg-green-50 border-green-200 hover:bg-green-100"
                       : "bg-gray-50 hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   {/* LEFT SIDE */}
                   <div className="flex items-center gap-4">
                     {/* Status Icon */}
                     <div
                       className={`w-6 h-6 flex items-center justify-center rounded-full border
-                      ${
-                        isCompleted
+                      ${isCompleted
                           ? "bg-green-500 border-green-500 text-white"
                           : "border-gray-400 text-gray-400"
-                      }`}
+                        }`}
                     >
                       {isCompleted ? "✔" : ""}
                     </div>
@@ -79,9 +95,8 @@ export default function StudentCoursePage() {
                     {/* Title */}
                     <div>
                       <p
-                        className={`font-medium ${
-                          isCompleted ? "text-green-700" : "text-gray-800"
-                        }`}
+                        className={`font-medium ${isCompleted ? "text-green-700" : "text-gray-800"
+                          }`}
                       >
                         {index + 1}. {lesson.title}
                       </p>
