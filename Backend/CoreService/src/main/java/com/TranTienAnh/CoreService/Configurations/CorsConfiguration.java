@@ -11,7 +11,7 @@ public class CorsConfiguration {
     @Value("${client.url}")
     private String clientUrl;
 
-    @Value("realtime.service.url")
+    @Value("${realtime.url}")
     private String realTimeServiceUrl;
 
     @Bean

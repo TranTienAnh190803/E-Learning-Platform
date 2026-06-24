@@ -54,6 +54,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Value("${kafka.topic.notification}")
     private String notificationTopic;
 
+    @Value("${kafka.topic.chat}")
+    private String chatTopic;
+
     @Override
     @PreAuthorize("hasAnyAuthority('STUDENT')")
     public Response<Void> enrollCourse(Long courseId, String password, String email, String token) {
@@ -197,9 +200,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // Rời phòng chat
         ChatRoomLeavingForm chatRoomLeavingForm = new ChatRoomLeavingForm(course.getId(), user.getId());
-        var chatRoomResponse = realtimeService.leaveChatRoom(token, chatRoomLeavingForm);
-        if (!chatRoomResponse.isSuccess())
-            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+//        var chatRoomResponse = realtimeService.leaveChatRoom(token, chatRoomLeavingForm);
+//        if (!chatRoomResponse.isSuccess())
+//            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+        Events<ChatRoomLeavingForm> event = new Events<>(EventsName.LEAVE_CHATROOM.name(), chatRoomLeavingForm);
+        kafkaProducerService.sendMessage(chatTopic, user.getId().toString(), event);
 
         response.setSuccess(true);
         response.setStatusCode(200);
