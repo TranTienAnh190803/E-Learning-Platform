@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { CourseForm } from "../Types/Course.type";
 import { getOneCourse, updateCourse } from "../Services/CoreService/CourseApi";
 import { objectToFormData } from "../Helper/Converter";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export default function CourseUpdatePage() {
   const { courseId } = useParams();
@@ -19,6 +20,7 @@ export default function CourseUpdatePage() {
     password: "",
   });
   const [preview, setPreview] = useState<string>("/assets/DefaultCourse.jpg");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchCourse = async () => {
     const response = await getOneCourse(Number(courseId));
@@ -32,8 +34,7 @@ export default function CourseUpdatePage() {
         publicCourse: data.publicCourse,
       });
       if (data.imageUrl) {
-        const coreService = import.meta.env.VITE_CORE_SERVICE;
-        setPreview(`${coreService}/${data.imageUrl}`);
+        setPreview(data.imageUrl);
       }
     } else {
       alert(response.message);
@@ -83,6 +84,7 @@ export default function CourseUpdatePage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const formData = objectToFormData(courseForm);
     const response = await updateCourse(Number(courseId), formData);
@@ -90,10 +92,14 @@ export default function CourseUpdatePage() {
     if (response.success) {
       navigate("/my-course");
     }
+
+    setLoading(false);
   };
 
   return (
     <>
+      {loading && <LoadingScreen />}
+
       <Navbar />
       <div className="flex justify-center py-10 mt-25 min-h-screen">
         <form

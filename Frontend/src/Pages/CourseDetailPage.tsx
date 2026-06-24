@@ -7,6 +7,7 @@ import { getOneCourse } from "../Services/CoreService/CourseApi";
 import type { CourseData } from "../Types/Course.type";
 import LessonList from "../Components/LessonList.CourseDetail";
 import Members from "../Components/Members.CourseDetail";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
@@ -24,14 +25,14 @@ export default function CourseDetailPage() {
     instructorAvatar: null,
     publicCourse: true,
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchCourse = async () => {
     const response = await getOneCourse(Number(courseId));
     if (response.success) {
-      const coreService = import.meta.env.VITE_CORE_SERVICE;
       let data = response.data!;
       if (response.data?.imageUrl) {
-        data.imageUrl = `${coreService}/${response.data.imageUrl}`;
+        data.imageUrl = response.data.imageUrl;
       }
       setCourse(data);
     } else alert(response.message);
@@ -43,6 +44,7 @@ export default function CourseDetailPage() {
 
   return (
     <>
+      {loading && <LoadingScreen />}
       <Navbar />
       <div className="flex justify-center min-h-screen py-10 mt-25">
         <div className="w-[80%] bg-white rounded-2xl shadow-xl p-8">
@@ -50,33 +52,30 @@ export default function CourseDetailPage() {
           <div className="flex border-b mb-8">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${
-                activeTab === "overview"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${activeTab === "overview"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Overview
             </button>
 
             <button
               onClick={() => setActiveTab("lessons")}
-              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${
-                activeTab === "lessons"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${activeTab === "lessons"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Lessons
             </button>
 
             <button
               onClick={() => setActiveTab("members")}
-              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${
-                activeTab === "members"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-6 py-3 text-sm font-medium transition cursor-pointer ${activeTab === "members"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Members
             </button>
@@ -85,7 +84,7 @@ export default function CourseDetailPage() {
           {/* CONTENT */}
           <div>
             {activeTab === "overview" && <Overview course={course} />}
-            {activeTab === "lessons" && <LessonList courseId={courseId!} />}
+            {activeTab === "lessons" && <LessonList courseId={courseId!} setLoading={setLoading} />}
             {activeTab === "members" && <Members courseId={courseId!} />}
           </div>
         </div>

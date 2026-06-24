@@ -1,5 +1,6 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
+import com.TranTienAnh.CoreService.DTOs.CloudinaryResponseDto;
 import com.TranTienAnh.CoreService.DTOs.JwtResponseDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.DTOs.UserDto;
@@ -11,9 +12,7 @@ import com.TranTienAnh.CoreService.Forms.ProfileChangingForm;
 import com.TranTienAnh.CoreService.Forms.RegistrationForm;
 import com.TranTienAnh.CoreService.Models.Entities.User;
 import com.TranTienAnh.CoreService.Models.Entities.UserOtp;
-import com.TranTienAnh.CoreService.Models.Enums.AccountStatus;
-import com.TranTienAnh.CoreService.Models.Enums.OtpPurpose;
-import com.TranTienAnh.CoreService.Models.Enums.Role;
+import com.TranTienAnh.CoreService.Models.Enums.*;
 import com.TranTienAnh.CoreService.Repositories.UserOtpRepository;
 import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
@@ -62,8 +61,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private FileService fileService;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Override
     @Transactional
@@ -208,11 +207,7 @@ public class UserServiceImpl implements UserService {
             var userList = userRepository.findByRoleIn(List.of(Role.STUDENT, Role.INSTRUCTOR))
                     .stream()
                     .map(u -> {
-                        String avatar = null;
-                        if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank()) {
-                            avatar = baseUrl + "/" + u.getAvatarPath();
-                        }
-                        return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
+                        return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), u.getAvatarPath());
                     })
                     .collect(Collectors.toList());
             response.setStatusCode(200);
@@ -239,10 +234,6 @@ public class UserServiceImpl implements UserService {
                 response.setMessage("User information not found");
             }
             else {
-                String avatar = null;
-                if (user.getAvatarPath() != null && !user.getAvatarPath().isBlank())
-                    avatar = baseUrl + "/" + user.getAvatarPath();
-
                 UserDto userDto = new UserDto(
                         user.getId(),
                         user.getFullName(),
@@ -253,7 +244,7 @@ public class UserServiceImpl implements UserService {
                         user.getEmail(),
                         user.getStatus().name(),
                         user.getStatus().getValue(),
-                        avatar
+                        user.getAvatarPath()
                 );
 
                 response.setSuccess(true);
@@ -521,6 +512,13 @@ public class UserServiceImpl implements UserService {
         try {
             var user = userRepository.findById(userId).orElse(null);
             if (user != null && user.getRole() != Role.ADMIN) {
+                if (user.getAvatarPath() != null) {
+                    cloudinaryService.deleteFile(
+                            CloudFolder.avatars.name() + "/" + user.getId().toString(),
+                            FileType.image.name()
+                    );
+                }
+
                 userRepository.delete(user);
 
                 response.setSuccess(true);
@@ -578,10 +576,7 @@ public class UserServiceImpl implements UserService {
 
         var result = userRepository.searchUser(email).stream()
                 .map(u -> {
-                    String avatar = null;
-                    if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank())
-                        avatar = baseUrl + "/" + u.getAvatarPath();
-                    return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
+                    return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), u.getAvatarPath());
                 })
                 .toList();
 
@@ -599,12 +594,7 @@ public class UserServiceImpl implements UserService {
         Response<List<UserDto>> response = new Response<>();
 
         var result = userRepository.findByRole(role).stream()
-                .map(u -> {
-                    String avatar = null;
-                    if (u.getAvatarPath() != null && !u.getAvatarPath().isBlank())
-                        avatar = baseUrl + "/" + u.getAvatarPath();
-                    return new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), avatar);
-                })
+                .map(u -> new UserDto(u.getId(), u.getFullName(), u.getGender(), u.getDateOfBirth(), u.getAddress(), u.getRole().name(), u.getEmail(), u.getStatus().name(), u.getStatus().getValue(), u.getAvatarPath()))
                 .toList();
 
         response.setSuccess(true);
@@ -620,9 +610,15 @@ public class UserServiceImpl implements UserService {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
-        String path = fileService.saveImage(file, user.getId(), "avatar");
+//        String path = fileService.saveImage(file, user.getId(), "avatar");
+        CloudinaryResponseDto result = cloudinaryService.uploadFile(
+                file,
+                CloudFolder.avatars.name(),
+                FileType.image.name(),
+                user.getId().toString()
+        );
 
-        user.setAvatarPath(path);
+        user.setAvatarPath(result.getContentUrl());
         userRepository.save(user);
 
         response.setStatusCode(200);
@@ -700,10 +696,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Response<Void> deleteUserAccount(String email) {
+    public Response<Void> deleteUserAccount(String email) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
+
+        if (user.getAvatarPath() != null) {
+            cloudinaryService.deleteFile(
+                    CloudFolder.avatars.name() + "/" + user.getId().toString(),
+                    FileType.image.name()
+            );
+        }
+
         userRepository.delete(user);
 
         response.setSuccess(true);

@@ -6,6 +6,7 @@ import type { LessonForm } from "../Types/Lesson.type";
 import { getLesson, updateLesson } from "../Services/CoreService/LessonApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { objectToFormData } from "../Helper/Converter";
+import LoadingScreen from "../Components/LoadingScreenComponent";
 
 export function LessonUpdatePage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function LessonUpdatePage() {
     videoFile: null,
   });
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchLesson = async () => {
     const response = await getLesson(Number(lessonId));
@@ -30,8 +32,7 @@ export function LessonUpdatePage() {
       });
 
       if (data.lessonType === "STUDY") {
-        const coreService = import.meta.env.VITE_CORE_SERVICE;
-        setVideoPreview(`${coreService}/${data.contentUrl}`);
+        setVideoPreview(data.contentUrl);
       }
     } else {
       alert(response.message);
@@ -62,6 +63,7 @@ export function LessonUpdatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const formData: FormData = objectToFormData(form);
     const response = await updateLesson(formData, Number(lessonId));
@@ -69,10 +71,14 @@ export function LessonUpdatePage() {
     if (response.success) {
       navigate(`/course-detail/${courseId}`);
     }
+
+    setLoading(false);
   };
 
   return (
     <>
+      {loading && <LoadingScreen />}
+
       <Navbar />
       <div className="flex justify-center min-h-screen py-12 mt-25">
         <form

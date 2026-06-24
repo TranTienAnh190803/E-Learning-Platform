@@ -1,11 +1,11 @@
 import express from "express";
 import {
-  createChatRoom,
+  // createChatRoom,
   deleteChatRoom,
   getChat,
   getMemberId,
   getParticipatedChatRoom,
-  joinChatRoom,
+  // joinChatRoom,
   leaveChatRoom,
   sendMessage,
 } from "../Controllers/ChatRoom.Controller.js";
@@ -13,8 +13,8 @@ import { authorization } from "../Middlewares/JWTAuthorization.js";
 
 const route = express.Router();
 
-route.post("/create-chat-room", authorization("INSTRUCTOR"), createChatRoom); // CoreService call (create course)
-route.post("/join-chat-room", authorization("STUDENT"), joinChatRoom); // CoreService call (enroll course)
+// route.post("/create-chat-room", authorization("INSTRUCTOR"), createChatRoom); // CoreService call (create course)
+// route.post("/join-chat-room", authorization("STUDENT"), joinChatRoom); // CoreService call (enroll course)
 route.post("/leave-chat-room", leaveChatRoom); // CoreService call (leave/kick course)
 route.delete(
   "/delete-chat-room/:courseId",

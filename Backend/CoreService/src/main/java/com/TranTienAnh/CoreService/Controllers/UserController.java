@@ -160,7 +160,7 @@ public class UserController {
     }
 
     @DeleteMapping("delete-user-account")
-    public ResponseEntity<Response<Void>> deleteUserAccount() {
+    public ResponseEntity<Response<Void>> deleteUserAccount() throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();

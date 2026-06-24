@@ -61,11 +61,7 @@ export default function Navbar() {
 
   // Socket
   const handleNotification = (data: NotificationData) => {
-    setNotification((prev) => {
-      const oldData = prev;
-      oldData.unshift(data);
-      return oldData;
-    });
+    setNotification((prev) => [data, ...prev]);
   };
 
   useEffect(() => {

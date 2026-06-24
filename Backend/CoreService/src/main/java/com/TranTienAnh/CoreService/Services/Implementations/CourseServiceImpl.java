@@ -1,6 +1,7 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.API.RealtimeService;
+import com.TranTienAnh.CoreService.DTOs.CloudinaryResponseDto;
 import com.TranTienAnh.CoreService.DTOs.CourseDto;
 import com.TranTienAnh.CoreService.DTOs.CourseMemberDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
@@ -9,8 +10,7 @@ import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
 import com.TranTienAnh.CoreService.Forms.*;
 import com.TranTienAnh.CoreService.Models.Entities.Course;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
-import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
-import com.TranTienAnh.CoreService.Models.Enums.Role;
+import com.TranTienAnh.CoreService.Models.Enums.*;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.LessonRepository;
@@ -18,6 +18,7 @@ import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.CourseService;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private LessonRepository lessonRepository;
+
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Value("${kafka.topic.notification}")
+    private String notificationTopic;
+
+    @Value("${kafka.topic.chat}")
+    private String chatTopic;
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
@@ -85,6 +98,32 @@ public class CourseServiceImpl implements CourseService {
         );
         var newLesson = lessonRepository.save(lesson);
 
+        // Save File
+        // Image (Course)
+        if (courseForm.getImage() != null) {
+//            image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
+            CloudinaryResponseDto result1 = cloudinaryService.uploadFile(
+                    courseForm.getImage(),
+                    CloudFolder.courses.name(),
+                    FileType.image.name(),
+                    newCourse.getId().toString()
+            );
+            newCourse.setImageUrl(result1.getContentUrl());
+            courseRepository.save(newCourse);
+        }
+        // Video (Lesson)
+        if (courseForm.getVideoFile() != null) {
+//            videoUrl = fileService.saveVideo(courseForm.getVideoFile(), newLesson.getId(), "lesson");
+            CloudinaryResponseDto result2 = cloudinaryService.uploadFile(
+                    courseForm.getVideoFile(),
+                    CloudFolder.lessons.name(),
+                    FileType.video.name(),
+                    newLesson.getId().toString()
+            );
+            newLesson.setContentUrl(result2.getContentUrl());
+            lessonRepository.save(newLesson);
+        }
+
         // Create Chat Room
         ChatRoomCreateForm chatRoomForm = new ChatRoomCreateForm(
                 newCourse.getId(),
@@ -93,25 +132,14 @@ public class CourseServiceImpl implements CourseService {
                 user.getId(),
                 newCourse.getTitle()
         );
-        var chatRoomResponse = realtimeService.createChatRoom(token, chatRoomForm);
-        if (!chatRoomResponse.isSuccess())
-            throw new CustomBadRequestException(chatRoomResponse.getMessage());
-
-        // Save File
-        // Image (Course)
-        String image = null;
-        if (courseForm.getImage() != null) {
-            image = fileService.saveImage(courseForm.getImage(), newCourse.getId(), "course");
-            newCourse.setImageUrl(image);
-            courseRepository.save(newCourse);
-        }
-        // Video (Lesson)
-        String videoUrl = null;
-        if (courseForm.getVideoFile() != null) {
-            videoUrl = fileService.saveVideo(courseForm.getVideoFile(), newLesson.getId(), "lesson");
-            newLesson.setContentUrl(videoUrl);
-            lessonRepository.save(newLesson);
-        }
+        Events<ChatRoomCreateForm> event = new Events<>(
+                EventsName.CREATE_CHATROOM.name(),
+                chatRoomForm
+        );
+//        var chatRoomResponse = realtimeService.createChatRoom(token, chatRoomForm);
+//        if (!chatRoomResponse.isSuccess())
+//            throw new CustomBadRequestException(chatRoomResponse.getMessage());
+        kafkaProducerService.sendMessage(chatTopic, user.getId().toString(), event);
 
         response.setSuccess(true);
         response.setStatusCode(200);
@@ -168,8 +196,14 @@ public class CourseServiceImpl implements CourseService {
         var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
 
         if (courseForm.getImage() != null) {
-            String image = fileService.saveImage(courseForm.getImage(), instructor.getId(), "course");
-            course.setImageUrl(image);
+//            String image = fileService.saveImage(courseForm.getImage(), instructor.getId(), "course");
+            CloudinaryResponseDto result = cloudinaryService.uploadFile(
+                    courseForm.getImage(),
+                    CloudFolder.courses.name(),
+                    FileType.image.name(),
+                    course.getId().toString()
+            );
+            course.setImageUrl(result.getContentUrl());
         }
 
         if (courseForm.isPublicCourse())
@@ -194,11 +228,23 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
-    public Response<Void> deleteCourse(String email, Long courseId, String token) {
+    public Response<Void> deleteCourse(String email, Long courseId, String token) throws IOException {
         Response<Void> response = new Response<>();
 
         var instructor = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var course = courseRepository.findByIdAndInstructorId(courseId, instructor.getId()).orElseThrow(() -> new CustomNotFoundException("Course not found."));
+
+        // Delete relevant file on Cloud
+        if (course.getImageUrl() != null) {
+            cloudinaryService.deleteFile(
+                    CloudFolder.courses.name() + "/" + course.getId().toString(),
+                    FileType.image.name()
+            );
+
+            List<Long> courseLessons = course.getLesson().stream().map(Lesson::getId).toList();
+            cloudinaryService.deleteListLessonFile(courseLessons);
+        }
+
         courseRepository.delete(course);
 
         // Delete chat room
@@ -206,7 +252,7 @@ public class CourseServiceImpl implements CourseService {
         if (!chatRoomResponse.isSuccess())
             throw new CustomBadRequestException(chatRoomResponse.getMessage());
 
-        // Push Notification (Call API pushNotification - pushNotification is main job)
+        // Push Notification (Send message by using Kafka)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
                 .stream()
                 .map(e -> e.getStudent().getId())
@@ -219,9 +265,14 @@ public class CourseServiceImpl implements CourseService {
                 null,
                 allStudent
         );
-        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
-        if (!notificationResponse.isSuccess())
-            throw new CustomBadRequestException(notificationResponse.getMessage());
+        Events<NotificationForm> events = new Events<>(
+                EventsName.NOTIFICATION_PUSH.name(),
+                notificationForm
+        );
+//        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+//        if (!notificationResponse.isSuccess())
+//            throw new CustomBadRequestException(notificationResponse.getMessage());
+        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
 
         response.setSuccess(true);
         response.setStatusCode(200);

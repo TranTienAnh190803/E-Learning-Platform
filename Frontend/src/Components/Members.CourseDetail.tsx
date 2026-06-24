@@ -16,14 +16,13 @@ export default function Members({ courseId }: Props) {
   const fetchCourseMember = async () => {
     const response = await getCourseMemeber(Number(courseId));
     if (response.success) {
-      const coreService = import.meta.env.VITE_CORE_SERVICE;
       const data: CourseMemberData[] = response.data!.map((value) => {
         return {
           studentId: value.studentId,
           fullName: value.fullName,
           email: value.email,
           avatarUrl: value.avatarUrl
-            ? `${coreService}/${value.avatarUrl}`
+            ? value.avatarUrl
             : `/assets/User.jpg`,
         };
       });

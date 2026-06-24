@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, type SetStateAction } from "react";
 import type { LessonListData } from "../Types/Lesson.type";
 import { deleteLesson, getAllLesson } from "../Services/CoreService/LessonApi";
 import { completeUpdateCourse } from "../Services/CoreService/CourseApi";
@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
   courseId: string;
+  setLoading: React.Dispatch<SetStateAction<boolean>>;
 }
 
-export default function LessonList({ courseId }: Props) {
+export default function LessonList({ courseId, setLoading }: Props) {
   const navigate = useNavigate();
   const [lessons, setLessons] = useState<LessonListData[]>([]);
 
@@ -24,9 +25,11 @@ export default function LessonList({ courseId }: Props) {
 
   const handleDeleteLesson = async (lessonId: number) => {
     if (confirm("Are you sure you want to DELETE this lesson.")) {
+      setLoading(true);
       const response = await deleteLesson(lessonId);
       alert(response.message);
       if (response.success) window.location.reload();
+      setLoading(false);
     }
   };
 

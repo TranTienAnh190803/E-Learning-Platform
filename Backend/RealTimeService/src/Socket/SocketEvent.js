@@ -47,7 +47,7 @@ export const socketEventHandler = (io) => {
         socket.join(room);
       });
 
-      console.log(`✅ Socket Connected`);
+      console.log(`✅ [SOCKET.IO] Connected`);
     } catch (error) {
       console.error("Connection error:", error);
       socket.disconnect();

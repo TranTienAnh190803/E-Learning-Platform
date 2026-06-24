@@ -1,17 +1,17 @@
 package com.TranTienAnh.CoreService.Services.Implementations;
 
 import com.TranTienAnh.CoreService.API.RealtimeService;
+import com.TranTienAnh.CoreService.DTOs.CloudinaryResponseDto;
 import com.TranTienAnh.CoreService.DTOs.LessonDto;
 import com.TranTienAnh.CoreService.DTOs.LessonListDto;
 import com.TranTienAnh.CoreService.DTOs.Response;
 import com.TranTienAnh.CoreService.Exceptions.CustomBadRequestException;
 import com.TranTienAnh.CoreService.Exceptions.CustomNotFoundException;
+import com.TranTienAnh.CoreService.Forms.Events;
 import com.TranTienAnh.CoreService.Forms.LessonForm;
 import com.TranTienAnh.CoreService.Forms.NotificationForm;
 import com.TranTienAnh.CoreService.Models.Entities.Lesson;
-import com.TranTienAnh.CoreService.Models.Enums.CourseStatus;
-import com.TranTienAnh.CoreService.Models.Enums.LessonType;
-import com.TranTienAnh.CoreService.Models.Enums.Role;
+import com.TranTienAnh.CoreService.Models.Enums.*;
 import com.TranTienAnh.CoreService.Repositories.CourseRepository;
 import com.TranTienAnh.CoreService.Repositories.EnrollmentRepository;
 import com.TranTienAnh.CoreService.Repositories.LessonRepository;
@@ -19,6 +19,7 @@ import com.TranTienAnh.CoreService.Repositories.UserRepository;
 import com.TranTienAnh.CoreService.Services.Interfaces.FileService;
 import com.TranTienAnh.CoreService.Services.Interfaces.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,15 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private RealtimeService realtimeService;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Value("${kafka.topic.notification}")
+    private String notificationTopic;
+
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
     @Transactional
@@ -69,7 +79,7 @@ public class LessonServiceImpl implements LessonService {
         course.setStatus(CourseStatus.Update);
         courseRepository.save(course);
 
-        // Push Notification to All Student (Call API pushNotification from RealtimeService)
+        // Push Notification to All Student (Send message)
         var allStudent = enrollmentRepository.findAllByCourseId(courseId)
                 .stream()
                 .map(e -> e.getStudent().getId())
@@ -82,15 +92,25 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getId().toString(),
                 allStudent
         );
-        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
-        if (!notificationResponse.isSuccess())
-            throw new CustomBadRequestException(notificationResponse.getMessage());
+        Events<NotificationForm> events = new Events<>(
+                EventsName.NOTIFICATION_PUSH.name(),
+                notificationForm
+        );
+//        var notificationResponse = realtimeService.pushNotification(token, notificationForm);
+//        if (!notificationResponse.isSuccess())
+//            throw new CustomBadRequestException(notificationResponse.getMessage());
+        kafkaProducerService.sendMessage(notificationTopic, courseId.toString(), events);
 
         // Save Video
-        String videoUrl = null;
         if (lessonForm.getVideoFile() != null) {
-            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
-            newLesson.setContentUrl(videoUrl);
+//            videoUrl = fileService.saveVideo(lessonForm.getVideoFile(), newLesson.getId(), "lesson");
+            CloudinaryResponseDto result = cloudinaryService.uploadFile(
+                    lessonForm.getVideoFile(),
+                    CloudFolder.lessons.name(),
+                    FileType.video.name(),
+                    newLesson.getId().toString()
+            );
+            newLesson.setContentUrl(result.getContentUrl());
             lessonRepository.save(newLesson);
         }
 
@@ -169,11 +189,22 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (lessonForm.getLessonType() == LessonType.WORK) {
+            if (lesson.getContentUrl() != null)
+                cloudinaryService.deleteFile(
+                        CloudFolder.lessons.name() + "/" + lesson.getId().toString(),
+                        FileType.video.name()
+                );
             lesson.setContentUrl(null);
         }
         if (lessonForm.getLessonType() == LessonType.STUDY && lessonForm.getVideoFile() != null) {
-            String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
-            lesson.setContentUrl(url);
+//            String url = fileService.saveVideo(lessonForm.getVideoFile(), lesson.getId(), "lesson");
+            CloudinaryResponseDto cloudinaryResponseDto = cloudinaryService.uploadFile(
+                    lessonForm.getVideoFile(),
+                    CloudFolder.lessons.name(),
+                    FileType.video.name(),
+                    lesson.getId().toString()
+            );
+            lesson.setContentUrl(cloudinaryResponseDto.getContentUrl());
         }
         lesson.setTitle(lessonForm.getTitle());
         lesson.setContent(lessonForm.getContent());
@@ -189,13 +220,20 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @PreAuthorize("hasAnyAuthority('INSTRUCTOR')")
-    public Response<Void> deleteLesson(Long lessonId, String email) {
+    public Response<Void> deleteLesson(Long lessonId, String email) throws IOException {
         Response<Void> response = new Response<>();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found."));
         var lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new CustomNotFoundException("Lesson not found."));
         if (!lesson.getCourse().getInstructor().equals(user)) {
             throw new CustomBadRequestException("This course is not belong to you.");
+        }
+
+        if (lesson.getContentUrl() != null) {
+            cloudinaryService.deleteFile(
+                    CloudFolder.lessons.name() + "/" + lesson.getId(),
+                    FileType.video.name()
+            );
         }
 
         lessonRepository.delete(lesson);

@@ -54,7 +54,7 @@ public class LessonController {
     }
 
     @DeleteMapping("delete-lesson/{lessonId}")
-    public ResponseEntity<Response<Void>> deleteLesson(@PathVariable("lessonId") Long lessonId) {
+    public ResponseEntity<Response<Void>> deleteLesson(@PathVariable("lessonId") Long lessonId) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
         String email = authentication.getName();

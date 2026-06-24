@@ -49,5 +49,5 @@ public interface UserService {
 
     Response<JwtResponseDto> verifyChangeEmail(String email, String otpCode, String newEmail);
 
-    Response<Void> deleteUserAccount(String email);
+    Response<Void> deleteUserAccount(String email) throws IOException;
 }

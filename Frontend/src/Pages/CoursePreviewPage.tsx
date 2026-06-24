@@ -37,7 +37,6 @@ export default function CoursePreviewPage() {
   const fetchCourse = async () => {
     const response = await getOneCourse(Number(courseId));
     if (response.success) {
-      const coreService = import.meta.env.VITE_CORE_SERVICE;
       const data = response.data!;
       setCourse({
         id: data.id,
@@ -45,10 +44,10 @@ export default function CoursePreviewPage() {
         description: data.description,
         status: data.status,
         results: data.results,
-        imageUrl: data.imageUrl ? `${coreService}/${data.imageUrl}` : null,
+        imageUrl: data.imageUrl ? data.imageUrl : null,
         instructor: data.instructor,
         instructorAvatar: data.instructorAvatar
-          ? `${coreService}/${data.instructorAvatar}`
+          ? data.instructorAvatar
           : null,
         publicCourse: data.publicCourse,
       });
@@ -203,13 +202,13 @@ export default function CoursePreviewPage() {
               {/* Enroll Button */}
               {(auth.status === "authenticated" &&
                 isInstructor(auth.user.role)) || (
-                <button
-                  onClick={() => handleEnroll()}
-                  className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition cursor-pointer"
-                >
-                  Enroll Now
-                </button>
-              )}
+                  <button
+                    onClick={() => handleEnroll()}
+                    className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition cursor-pointer"
+                  >
+                    Enroll Now
+                  </button>
+                )}
 
               <div className="text-xs text-gray-400 text-center">
                 Full lifetime access

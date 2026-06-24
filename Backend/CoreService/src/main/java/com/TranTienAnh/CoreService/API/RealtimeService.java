@@ -18,62 +18,63 @@ public class RealtimeService {
     @Autowired
     private WebClient webClient;
 
-    public Response<Void> pushNotification(String token, NotificationForm notificationForm) {
-        return webClient.post()
-                .uri(realtimeUrl + "/notification-api/push-notification")
-                .headers(headers -> headers.setBearerAuth(token))
-                .bodyValue(notificationForm)
-                .exchangeToMono(response -> {
-                    int statusCode = response.statusCode().value();
-                    if (statusCode == 200) {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(true, 200, "Push notification successfully", null));
-                    }
-                    else {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(false, 400, "Cannot push notification to related user", null));
-                    }
-                })
-                .block();
-    }
+    // Use message queue (Kafka) instead of calling API
+//    public Response<Void> pushNotification(String token, NotificationForm notificationForm) {
+//        return webClient.post()
+//                .uri(realtimeUrl + "/notification-api/push-notification")
+//                .headers(headers -> headers.setBearerAuth(token))
+//                .bodyValue(notificationForm)
+//                .exchangeToMono(response -> {
+//                    int statusCode = response.statusCode().value();
+//                    if (statusCode == 200) {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(true, 200, "Push notification successfully", null));
+//                    }
+//                    else {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(false, 400, "Cannot push notification to related user", null));
+//                    }
+//                })
+//                .block();
+//    }
 
-    public Response<Void> createChatRoom(String token, ChatRoomCreateForm chatRoomForm) {
-        return webClient.post()
-                .uri(realtimeUrl + "/chat-room-api/create-chat-room")
-                .headers(headers -> headers.setBearerAuth(token))
-                .bodyValue(chatRoomForm)
-                .exchangeToMono(response -> {
-                    int statusCode = response.statusCode().value();
-                    if (statusCode == 200) {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(true, 200, " ", null));
-                    }
-                    else {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(false, 400, "Cannot create chat room", null));
-                    }
-                })
-                .block();
-    }
+//    public Response<Void> createChatRoom(String token, ChatRoomCreateForm chatRoomForm) {
+//        return webClient.post()
+//                .uri(realtimeUrl + "/chat-room-api/create-chat-room")
+//                .headers(headers -> headers.setBearerAuth(token))
+//                .bodyValue(chatRoomForm)
+//                .exchangeToMono(response -> {
+//                    int statusCode = response.statusCode().value();
+//                    if (statusCode == 200) {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(true, 200, " ", null));
+//                    }
+//                    else {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(false, 400, "Cannot create chat room", null));
+//                    }
+//                })
+//                .block();
+//    }
 
-    public Response<Void> joinChatRoom(String token, ChatRoomForm chatRoomForm) {
-        return webClient.post()
-                .uri(realtimeUrl + "/chat-room-api/join-chat-room")
-                .headers(headers -> headers.setBearerAuth(token))
-                .bodyValue(chatRoomForm)
-                .exchangeToMono(response -> {
-                    int statusCode = response.statusCode().value();
-                    if (statusCode == 200) {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(true, 200, " ", null));
-                    }
-                    else {
-                        return response.bodyToMono(Response.class)
-                                .map(body -> new Response<Void>(false, 400, "Cannot join chat room", null));
-                    }
-                })
-                .block();
-    }
+//    public Response<Void> joinChatRoom(String token, ChatRoomForm chatRoomForm) {
+//        return webClient.post()
+//                .uri(realtimeUrl + "/chat-room-api/join-chat-room")
+//                .headers(headers -> headers.setBearerAuth(token))
+//                .bodyValue(chatRoomForm)
+//                .exchangeToMono(response -> {
+//                    int statusCode = response.statusCode().value();
+//                    if (statusCode == 200) {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(true, 200, " ", null));
+//                    }
+//                    else {
+//                        return response.bodyToMono(Response.class)
+//                                .map(body -> new Response<Void>(false, 400, "Cannot join chat room", null));
+//                    }
+//                })
+//                .block();
+//    }
 
     public Response<Void> leaveChatRoom(String token, ChatRoomLeavingForm chatRoomLeavingForm) {
         return webClient.post()

@@ -12,8 +12,6 @@ import { isInstructor } from "../Helper/CheckRole";
 import { FaCircle, FaSearch } from "react-icons/fa";
 import { IoIosMore } from "react-icons/io";
 
-const coreService = import.meta.env.VITE_CORE_SERVICE;
-
 export default function InstructorCoursePage() {
   // Global State
   const auth = useAuthStore((s) => s.auth);
@@ -78,8 +76,8 @@ export default function InstructorCoursePage() {
                 <tr className="bg-gray-100 border-b border-gray-300 font-bold">
                   <td className="px-4 py-2">#</td>
                   <td className="px-4 py-2">Title</td>
-                  <td className="px-4 py-2">Public</td>
-                  <td className="px-4 py-2">Status</td>
+                  <td className="px-4 py-2 text-center">Public</td>
+                  <td className="px-4 py-2 text-center">Status</td>
                   <td className="px-4 py-2"></td>
                 </tr>
               </thead>
@@ -95,7 +93,7 @@ export default function InstructorCoursePage() {
                         <img
                           src={
                             value.imageUrl
-                              ? `${coreService}/${value.imageUrl}`
+                              ? value.imageUrl
                               : "assets/DefaultCourse.jpg"
                           }
                           className="block w-[15%]"
@@ -109,8 +107,8 @@ export default function InstructorCoursePage() {
                           />
                         }
                       </td>
-                      <td className="px-4 py-2">{value.status}</td>
-                      <td>
+                      <td className="px-4 py-2 text-center">{value.status}</td>
+                      <td className="place-items-center">
                         <div className="relative">
                           <div
                             className="hover:bg-gray-300 aspect-square w-10 rounded-full flex justify-center items-center"

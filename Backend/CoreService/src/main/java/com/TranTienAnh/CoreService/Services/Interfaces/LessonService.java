@@ -17,5 +17,5 @@ public interface LessonService {
 
     Response<Void> updateLesson(Long lessonId, LessonForm lessonForm, String email) throws IOException;
 
-    Response<Void> deleteLesson(Long lessonId, String email);
+    Response<Void> deleteLesson(Long lessonId, String email) throws IOException;
 }
